@@ -4,6 +4,13 @@
     <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+	<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+	<Authors>Teesofttech</Authors>
+	<PackageId>CronCraft</PackageId>
+	<Version>1.0.0</Version>
+	<Description>Convert cron expressions into localized human-readable formats</Description>
+	<PackageTags>cron human-readable parser schedule localization</PackageTags>
+	<RepositoryUrl>https://github.com/teesofttech/CronCraft</RepositoryUrl>
   </PropertyGroup>
 
   <ItemGroup>
