@@ -37,20 +37,12 @@ jobs:
     - name: 🚀 Publish to NuGet.org
       run: dotnet nuget push ./nupkgs/*.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate
 
-    - name: 🧩 Add GitHub Packages source
-      run: dotnet nuget add source \
-             --username ${{ github.actor }} \
-             --password ${{ secrets.GITHUB_TOKEN }} \
-             --store-password-in-clear-text \
-             --name github \
-             https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json
-
-    - name: 📦 Publish to GitHub Packages
-      run: dotnet nuget push ./nupkgs/*.nupkg --source github --api-key ${{ secrets.GITHUB_TOKEN }}
+    - name: 📦 Publish to GitHub Packages 
+      run: dotnet nuget push ./nupkgs/*.nupkg --source github --api-key ${{ secrets.GH_PACKAGES_TOKEN  }} --source "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json"
 
     - name: 📤 Upload Release Artifact
       uses: softprops/action-gh-release@v1
       with:
         files: ./nupkgs/*.nupkg
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GITHUB_TOKEN: ${{ secrets.GH_PACKAGES_TOKEN }}
