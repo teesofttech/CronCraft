@@ -1,10 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace CronCraft.Models;
-internal class CronSettings
+﻿namespace CronCraft.Models;
+public class CronSettings
 {
+    public string DayNameFormat { get; set; } = "short";
+    public Dictionary<string, string>? CustomDayMappings { get; set; }
 }

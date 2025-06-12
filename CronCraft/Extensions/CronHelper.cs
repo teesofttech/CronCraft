@@ -1,20 +1,12 @@
-﻿namespace CronCraft.Helper;
+﻿using CronCraft.Models;
+using CronCraft.Providers;
+
+namespace CronCraft.Helper;
 public static class CronHelper
 {
-    private static readonly Dictionary<string, string> DaysMap = new()
+    public static string ToHumanReadable(this string cronExpression, CronSettings settings, TimeZoneInfo timeZone = null)
     {
-        { "0", "Sun" },
-        { "1", "Mon" },
-        { "2", "Tue" },
-        { "3", "Wed" },
-        { "4", "Thu" },
-        { "5", "Fri" },
-        { "6", "Sat" },
-        { "7", "Sun" },
-    };
-
-    public static string ToHumanReadable(this string cronExpression, TimeZoneInfo timeZone = null)
-    {
+        var daysMap = DayNameProvider.GetDayMap(settings);
         string cronosCompatible = ConvertQuartzToCronos(cronExpression);
         string[] parts = cronosCompatible.Split(' ', StringSplitOptions.RemoveEmptyEntries);
         if (parts.Length != 5)
@@ -39,7 +31,7 @@ public static class CronHelper
         {
             string interval = hour.Replace("*/", "");
             if (dayOfWeek != "*" && !IsAllDays(dayOfWeek))
-                return $"Every {interval} hours on {JoinDays(dayOfWeek)}";
+                return $"Every {interval} hours on {JoinDays(dayOfWeek, daysMap)}";
 
             return $"Every {interval} hours";
         }
@@ -47,13 +39,14 @@ public static class CronHelper
         // Handle specific time of day
         if ((dayOfWeek == "*" || dayOfWeek == "?") && dayOfMonth == "*")
         {
+            //return $"Every {JoinDays(dayOfWeek, daysMap)} at {time}";
             return $"Every day at {time}";
         }
 
         // Handle specific days of the week
         if (dayOfWeek != "*" && dayOfWeek != "?" && dayOfMonth == "*")
         {
-            return $"Every {JoinDays(dayOfWeek)} at {time}";
+            return $"Every {JoinDays(dayOfWeek, daysMap)} at {time}";
         }
 
         // Handle specific day of month
@@ -66,13 +59,13 @@ public static class CronHelper
         // Handle specific day of month and day of week combinations
         if (dayOfMonth != "*" && dayOfWeek != "*")
         {
-            return $"On {Ordinal(dayOfMonth)} and {JoinDays(dayOfWeek)} at {time}";
+            return $"On {Ordinal(dayOfMonth)} and {JoinDays(dayOfWeek, daysMap)} at {time}";
         }
 
         return cronExpression;
     }
 
-  
+
 
     #region [Private Methods]
 
@@ -153,11 +146,11 @@ public static class CronHelper
     /// </summary>
     /// <param name="dayOfWeek"></param>
     /// <returns></returns>
-    private static string JoinDays(string dayOfWeek)
+    private static string JoinDays(string dayOfWeek, Dictionary<string, string> daysMap)
     {
-        List<string> days = dayOfWeek
+        var days = dayOfWeek
             .Split(',')
-            .Select(d => DaysMap.ContainsKey(d) ? DaysMap[d] : $"Day {d}")
+            .Select(d => daysMap.TryGetValue(d, out var name) ? name : $"Day {d}")
             .Distinct()
             .ToList();
 
