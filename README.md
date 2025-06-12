@@ -103,6 +103,32 @@ Press Enter to exit...
 
 ---
 
+## 🤝 Contributing
+
+Contributions are welcome! If you'd like to:
+
+- Fix a bug
+- Improve performance
+- Add support for a new language
+- Refactor or improve documentation
+
+Feel free to open a [Pull Request](https://github.com/teesofttech/CronCraft/pulls) or start a [Discussion](https://github.com/teesofttech/CronCraft/discussions).
+
+Before contributing:
+
+1. Fork the repo
+2. Create your feature branch (`git checkout -b feature/your-feature`)
+3. Commit your changes (`git commit -m 'Add your message'`)
+4. Push to the branch (`git push origin feature/your-feature`)
+5. Open a pull request 🚀
+
+If you're not sure where to start, check the [issues](https://github.com/teesofttech/CronCraft/issues).
+
+Let's make cron expressions human again! ❤️
+
+---
+
 ## 📄 License
 
-MIT
+This project is licensed under the MIT License.  
+See the [LICENSE](LICENSE) file for details.
