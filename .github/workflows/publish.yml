@@ -3,7 +3,7 @@ name: 🚀 Build, Test, and Publish CronCraft
 on:
   push:
     tags:
-      - 'v*.*.*'  # triggers on version tags like v1.0.0
+      - 'v*.*.*'  # Trigger only on version tags like v1.0.0
 
 jobs:
   build-test-pack-publish:
@@ -16,7 +16,7 @@ jobs:
     - name: 🧰 Setup .NET
       uses: actions/setup-dotnet@v3
       with:
-        dotnet-version: '8.0.x'  # or match your project target
+        dotnet-version: '8.0.x'
 
     - name: 🔍 Restore dependencies
       run: dotnet restore
@@ -25,12 +25,28 @@ jobs:
       run: dotnet build --configuration Release --no-restore
 
     - name: 🧪 Run tests
-      run: dotnet test --configuration Release --no-restore
+      run: dotnet test --configuration Release --no-restore --verbosity normal
 
     - name: 📦 Pack SDK
       run: dotnet pack ./CronCraft/CronCraft.csproj --configuration Release --output ./nupkgs
 
-    - name: 🚀 Publish to NuGet
+    - name: 🚀 Publish to NuGet.org
       run: dotnet nuget push ./nupkgs/*.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate
+
+    - name: 🧩 Add GitHub Packages source
+      run: dotnet nuget add source \
+             --username ${{ github.actor }} \
+             --password ${{ secrets.GITHUB_TOKEN }} \
+             --store-password-in-clear-text \
+             --name github \
+             https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json
+
+    - name: 📦 Publish to GitHub Packages
+      run: dotnet nuget push ./nupkgs/*.nupkg --source github --api-key ${{ secrets.GITHUB_TOKEN }}
+
+    - name: 📤 Upload Release Artifact
+      uses: softprops/action-gh-release@v1
+      with:
+        files: ./nupkgs/*.nupkg
       env:
-        NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
