@@ -11,10 +11,17 @@
 	<Description>Convert cron expressions into localized human-readable formats</Description>
 	<PackageTags>cron human-readable parser schedule localization</PackageTags>
 	<RepositoryUrl>https://github.com/teesofttech/CronCraft</RepositoryUrl>
+	<PackageLicenseExpression>MIT</PackageLicenseExpression>
+	<PackageReadmeFile>README.md</PackageReadmeFile>
+	<RepositoryType>git</RepositoryType>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.Options" Version="9.0.6" />
+  </ItemGroup>
+
+  <ItemGroup>
+	<None Include="README.md" Pack="true" PackagePath="" />
   </ItemGroup>
 
 </Project>
