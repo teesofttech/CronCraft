@@ -1,7 +1,7 @@
 
 # 🕒 CronCraft
 
-**CronCraft** is a lightweight, developer-friendly .NET SDK that converts cron expressions into human-readable strings, with support for localization, formatting, and time zone awareness — no configuration files required.
+**CronCraft** is a lightweight, developer-friendly .NET SDK that converts cron expressions into human-readable strings — with support for localization, formatting, and time zone awareness — no configuration files required.
 
 ---
 
@@ -37,27 +37,43 @@ dotnet add package CronCraft
 
 ```csharp
 using CronCraft.Models;
-using CronCraft.Helper;
+using CronCraft.Extensions;
+
+string cronExpression = "0 0 * * *"; // Every day at midnight
 
 var settings = new CronSettings
 {
     Language = "en",
-    DayNameFormat = "short",
-    CustomDayMappings = new Dictionary<string, string>
-    {
-        { "0", "Sunday" },
-        { "1", "Monday" },
-        { "2", "Tuesday" },
-        { "3", "Wednesday" },
-        { "4", "Thursday" },
-        { "5", "Friday" },
-        { "6", "Saturday" },
-        { "7", "Sunday" }
-    }
+    DayNameFormat = "short"
 };
 
-string result = CronHelper.ToHumanReadable("30 14 * * *", settings, TimeZoneInfo.Local);
-Console.WriteLine(result); // Output: "Chaque jour à 02:30 PM"
+// Without timezone
+string humanReadable = cronExpression.ToHumanReadable(settings);
+Console.WriteLine("🔁 CronCraft Expression Translator");
+Console.WriteLine("-----------------------------------");
+Console.WriteLine($"🧾 Cron Expression:   {cronExpression}");
+Console.WriteLine($"📖 Human Readable:    {humanReadable}");
+Console.WriteLine("-----------------------------------");
+Console.WriteLine("Press Enter to exit...");
+
+// With TimeZone
+TimeZoneInfo timeZone = TimeZoneInfo.FindSystemTimeZoneById("W. Central Africa Standard Time");
+humanReadable = cronExpression.ToHumanReadable(settings, timeZone);
+Console.WriteLine($"📖 Human Readable (Local TZ): {humanReadable}");
+
+Console.ReadLine();
+```
+
+**Expected Output:**
+
+```
+🔁 CronCraft Expression Translator
+-----------------------------------
+🧾 Cron Expression:   0 0 * * *
+📖 Human Readable:    Every day at 12:00 AM
+-----------------------------------
+📖 Human Readable (Local TZ): Every day at 01:00 AM
+Press Enter to exit...
 ```
 
 ---
@@ -83,7 +99,7 @@ Console.WriteLine(result); // Output: "Chaque jour à 02:30 PM"
 ## 🧑‍💻 Author
 
 **Esanju Babatunde**  
-[GitHub](https://github.com/teesofttech) · [LinkedIn](https://linkedin.com/in/esanju)
+[GitHub](https://github.com/teesofttech) · [LinkedIn](https://www.linkedin.com/in/esanju-babatunde)
 
 ---
 
