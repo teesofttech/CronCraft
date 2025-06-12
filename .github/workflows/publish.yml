@@ -4,6 +4,10 @@ on:
   push:
     tags:
       - 'v*.*.*'  # Trigger only on version tags like v1.0.0
+      
+permissions:
+  packages: write
+  contents: write
 
 jobs:
   build-test-pack-publish:
