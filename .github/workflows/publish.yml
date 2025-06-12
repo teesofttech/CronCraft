@@ -5,10 +5,6 @@ on:
     tags:
       - 'v*.*.*'  # Trigger only on version tags like v1.0.0
       
-permissions:
-  packages: write
-  contents: write
-
 jobs:
   build-test-pack-publish:
     runs-on: ubuntu-latest
@@ -38,11 +34,4 @@ jobs:
       run: dotnet nuget push ./nupkgs/*.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate
 
     - name: 📦 Publish to GitHub Packages 
-      run: dotnet nuget push ./nupkgs/*.nupkg --source github --api-key ${{ secrets.GH_PACKAGES_TOKEN  }} --source "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json"
-
-    - name: 📤 Upload Release Artifact
-      uses: softprops/action-gh-release@v1
-      with:
-        files: ./nupkgs/*.nupkg
-      env:
-        GITHUB_TOKEN: ${{ secrets.GH_PACKAGES_TOKEN }}
+      run: dotnet nuget push ./nupkgs/*.nupkg --api-key ${{ secrets.GH_PACKAGES_TOKEN }} --source "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json"
