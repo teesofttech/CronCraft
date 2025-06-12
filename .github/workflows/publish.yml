@@ -1,0 +1,36 @@
+name: 🚀 Build, Test, and Publish CronCraft
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'  # triggers on version tags like v1.0.0
+
+jobs:
+  build-test-pack-publish:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: 📥 Checkout code
+      uses: actions/checkout@v3
+
+    - name: 🧰 Setup .NET
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: '8.0.x'  # or match your project target
+
+    - name: 🔍 Restore dependencies
+      run: dotnet restore
+
+    - name: 🛠 Build solution
+      run: dotnet build --configuration Release --no-restore
+
+    - name: 🧪 Run tests
+      run: dotnet test --no-restore --no-build --verbosity normal
+
+    - name: 📦 Pack SDK
+      run: dotnet pack ./CronCraft/CronCraft.csproj --configuration Release --output ./nupkgs
+
+    - name: 🚀 Publish to NuGet
+      run: dotnet nuget push ./nupkgs/*.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate
+      env:
+        NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
