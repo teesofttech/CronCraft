@@ -7,9 +7,9 @@
 	<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 	<Authors>Teesofttech</Authors>
 	<PackageId>CronCraft</PackageId>
-	<Version>1.0.0</Version>
+	<Version>1.0.2</Version>
 	<Description>Convert cron expressions into localized human-readable formats</Description>
-	<PackageTags>cron human-readable parser schedule localization</PackageTags>
+	<PackageTags>Cron human-readable parser schedule localization</PackageTags>
 	<RepositoryUrl>https://github.com/teesofttech/CronCraft</RepositoryUrl>
 	<PackageLicenseExpression>MIT</PackageLicenseExpression>
 	<PackageReadmeFile>README.md</PackageReadmeFile>
