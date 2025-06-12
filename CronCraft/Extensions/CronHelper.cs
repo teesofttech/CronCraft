@@ -1,71 +1,137 @@
 ﻿using CronCraft.Models;
 using CronCraft.Providers;
 
-namespace CronCraft.Helper;
+namespace CronCraft.Extensions;
 public static class CronHelper
 {
+    /// <summary>
+    /// To convert a cron expression to a human-readable format based on the specified language and settings.
+    /// </summary>
+    /// <param name="cronExpression"></param>
+    /// <param name="settings"></param>
+    /// <param name="timeZone"></param>
+    /// <returns></returns>
     public static string ToHumanReadable(this string cronExpression, CronSettings settings, TimeZoneInfo timeZone = null)
     {
+        return settings.Language.ToLower() switch
+        {
+            "es" => ToHumanReadableSpanish(cronExpression, settings, timeZone),
+            "fr" => ToHumanReadableFrench(cronExpression, settings, timeZone),
+            _ => ToHumanReadableEnglish(cronExpression, settings, timeZone)
+        };
+    }
+
+    /// <summary>
+    /// To convert a cron expression to a human-readable format in English. 
+    /// </summary>
+    /// <param name="cron"></param>
+    /// <param name="settings"></param>
+    /// <param name="tz"></param>
+    /// <returns></returns>
+    private static string ToHumanReadableEnglish(string cron, CronSettings settings, TimeZoneInfo tz)
+    {
+        return BuildHumanReadable(cron, settings, tz, new Dictionary<string, string>
+        {
+            ["EveryDay"] = "Every day",
+            ["AtTime"] = "at {0}",
+            ["EveryXMinutes"] = "Every {0} minutes",
+            ["EveryXHours"] = "Every {0} hours",
+            ["EveryXHoursOn"] = "Every {0} hours on {1}",
+            ["EveryMonthOnDay"] = "Every month on the {0}",
+            ["OnDayAndWeek"] = "On {0} and {1}"
+        });
+    }
+
+    /// <summary>
+    /// To convert a cron expression to a human-readable format in Spanish.
+    /// </summary>
+    /// <param name="cron"></param>
+    /// <param name="settings"></param>
+    /// <param name="tz"></param>
+    /// <returns></returns>
+    private static string ToHumanReadableSpanish(string cron, CronSettings settings, TimeZoneInfo tz)
+    {
+        return BuildHumanReadable(cron, settings, tz, new Dictionary<string, string>
+        {
+            ["EveryDay"] = "Cada día",
+            ["AtTime"] = "a las {0}",
+            ["EveryXMinutes"] = "Cada {0} minutos",
+            ["EveryXHours"] = "Cada {0} horas",
+            ["EveryXHoursOn"] = "Cada {0} horas los {1}",
+            ["EveryMonthOnDay"] = "Cada mes el día {0}",
+            ["OnDayAndWeek"] = "El {0} y los {1}"
+        });
+    }
+
+    /// <summary>
+    /// To convert a cron expression to a human-readable format in French.
+    /// </summary>
+    /// <param name="cron"></param>
+    /// <param name="settings"></param>
+    /// <param name="tz"></param>
+    /// <returns></returns>
+    private static string ToHumanReadableFrench(string cron, CronSettings settings, TimeZoneInfo tz)
+    {
+        return BuildHumanReadable(cron, settings, tz, new Dictionary<string, string>
+        {
+            ["EveryDay"] = "Chaque jour",
+            ["AtTime"] = "à {0}",
+            ["EveryXMinutes"] = "Toutes les {0} minutes",
+            ["EveryXHours"] = "Toutes les {0} heures",
+            ["EveryXHoursOn"] = "Toutes les {0} heures le {1}",
+            ["EveryMonthOnDay"] = "Chaque mois le {0}",
+            ["OnDayAndWeek"] = "Le {0} et le {1}"
+        });
+    }
+
+    /// <summary>
+    /// Builds a human-readable string from a cron expression using the specified settings and time zone.
+    /// </summary>
+    /// <param name="cron"></param>
+    /// <param name="settings"></param>
+    /// <param name="timeZone"></param>
+    /// <param name="phrases"></param>
+    /// <returns></returns>
+    private static string BuildHumanReadable(string cron, CronSettings settings, TimeZoneInfo timeZone, Dictionary<string, string> phrases)
+    {
         var daysMap = DayNameProvider.GetDayMap(settings);
-        string cronosCompatible = ConvertQuartzToCronos(cronExpression);
-        string[] parts = cronosCompatible.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-        if (parts.Length != 5)
-            return "Invalid cron expression";
+        string[] parts = ConvertQuartzToCronos(cron).Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        if (parts.Length != 5) return "Invalid cron expression";
 
-        string minute = parts[0];
-        string hour = parts[1];
-        string dayOfMonth = parts[2];
-        string month = parts[3];
-        string dayOfWeek = parts[4];
-
+        string minute = parts[0], hour = parts[1], dayOfMonth = parts[2], month = parts[3], dayOfWeek = parts[4];
         string time = FormatTime(hour, minute, timeZone);
 
-        // Handle every minute
-        if (minute.StartsWith("*/") && hour == "*")
-        {
-            return $"Every {minute.Replace("*/", "")} minutes";
-        }
+        string Phrase(string key, params object[] args) =>
+            phrases.TryGetValue(key, out var value) ? string.Format(value, args) : string.Format(key, args);
 
-        // Handle specific hours
+        if (minute.StartsWith("*/") && hour == "*")
+            return Phrase("EveryXMinutes", minute.Replace("*/", ""));
+
         if (hour.StartsWith("*/") && minute == "0")
         {
-            string interval = hour.Replace("*/", "");
-            if (dayOfWeek != "*" && !IsAllDays(dayOfWeek))
-                return $"Every {interval} hours on {JoinDays(dayOfWeek, daysMap)}";
-
-            return $"Every {interval} hours";
+            var interval = hour.Replace("*/", "");
+            return dayOfWeek != "*" && !IsAllDays(dayOfWeek)
+                ? Phrase("EveryXHoursOn", interval, JoinDays(dayOfWeek, daysMap))
+                : Phrase("EveryXHours", interval);
         }
 
-        // Handle specific time of day
         if ((dayOfWeek == "*" || dayOfWeek == "?") && dayOfMonth == "*")
-        {
-            //return $"Every {JoinDays(dayOfWeek, daysMap)} at {time}";
-            return $"Every day at {time}";
-        }
+            return Phrase("EveryDay") + " " + Phrase("AtTime", time);
 
-        // Handle specific days of the week
-        if (dayOfWeek != "*" && dayOfWeek != "?" && dayOfMonth == "*")
-        {
-            return $"Every {JoinDays(dayOfWeek, daysMap)} at {time}";
-        }
+        if (dayOfWeek != "*" && dayOfMonth == "*")
+            return $"Every {JoinDays(dayOfWeek, daysMap)} {Phrase("AtTime", time)}";
 
-        // Handle specific day of month
         if (dayOfMonth != "*" && (dayOfWeek == "*" || dayOfWeek == "?"))
         {
             string monthDesc = month.StartsWith("*/") ? $"Every {month.Replace("*/", "")} months" : "Every month";
-            return $"{monthDesc} on the {Ordinal(dayOfMonth)} at {time}";
+            return $"{monthDesc} on the {Ordinal(dayOfMonth)} {Phrase("AtTime", time)}";
         }
 
-        // Handle specific day of month and day of week combinations
         if (dayOfMonth != "*" && dayOfWeek != "*")
-        {
-            return $"On {Ordinal(dayOfMonth)} and {JoinDays(dayOfWeek, daysMap)} at {time}";
-        }
+            return Phrase("OnDayAndWeek", Ordinal(dayOfMonth), JoinDays(dayOfWeek, daysMap)) + " " + Phrase("AtTime", time);
 
-        return cronExpression;
+        return cron;
     }
-
-
 
     #region [Private Methods]
 

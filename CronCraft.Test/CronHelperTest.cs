@@ -1,4 +1,4 @@
-﻿using CronCraft.Helper;
+﻿using CronCraft.Extensions;
 using CronCraft.Models;
 
 namespace CronCraft.Test;
@@ -8,6 +8,7 @@ public sealed class CronHelperTest
 {
     private CronSettings settings = new CronSettings
     {
+        Language = "en",
         DayNameFormat = "custom",
         CustomDayMappings = new()
         {

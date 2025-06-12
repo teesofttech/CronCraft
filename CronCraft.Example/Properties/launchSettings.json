@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "CronCraft.Example": {
+      "commandName": "Project"
+    },
+    "Container (Dockerfile)": {
+      "commandName": "Docker"
+    }
+  }
+}
