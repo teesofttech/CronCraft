@@ -25,7 +25,7 @@ jobs:
       run: dotnet build --configuration Release --no-restore
 
     - name: 🧪 Run tests
-      run: dotnet test CronCraft.Test/CronCraft.Test.csproj --configuration Release --no-build
+      run: dotnet test --configuration Release --no-restore
 
     - name: 📦 Pack SDK
       run: dotnet pack ./CronCraft/CronCraft.csproj --configuration Release --output ./nupkgs
