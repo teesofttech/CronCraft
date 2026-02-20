@@ -122,7 +122,7 @@ Before contributing:
 4. Push to the branch (`git push origin feature/your-feature`)
 5. Open a pull request 🚀
 
-If you're not sure where to start, check the [issues](https://github.com/teesofttech/CronCraft/issues).
+If you're not sure where to start, check the [issues](https://github.com/teesofttech/CronCraft/issues) or the [CONTRIBUTING guide](CONTRIBUTING.md) for a full list of open tasks.
 
 Let's make cron expressions human again! ❤️
 
