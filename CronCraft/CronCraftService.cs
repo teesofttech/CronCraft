@@ -3,6 +3,7 @@ using CronCraft.Models;
 using Microsoft.Extensions.Options;
 
 namespace CronCraft;
+
 public class CronCraftService
 {
     private readonly CronSettings _settings;
@@ -12,7 +13,7 @@ public class CronCraftService
         _settings = settings.Value;
     }
 
-    public string Convert(string cronExpression, TimeZoneInfo timeZone = null) 
+    public string Convert(string cronExpression, TimeZoneInfo? timeZone = null)
     {
         return cronExpression.ToHumanReadable(_settings, timeZone);
     }
