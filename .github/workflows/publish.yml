@@ -4,21 +4,27 @@ on:
   push:
     tags:
       - 'v*.*.*'  # Trigger only on version tags like v1.0.0
-      
+
+permissions:
+  contents: write       # create GitHub Releases and read tags
+  pull-requests: write  # comment on merged PRs
+
 jobs:
   build-test-pack-publish:
     runs-on: ubuntu-latest
 
     steps:
     - name: 📥 Checkout code
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0  # full history needed to detect previous tag and merged PRs
 
     - name: 🧰 Setup .NET
-      uses: actions/setup-dotnet@v3
+      uses: actions/setup-dotnet@v4
       with:
         dotnet-version: '8.0.x'
-        
-    - name: 🧪 Extract version from tag
+
+    - name: 🏷 Extract version from tag
       id: version
       run: echo "version=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
 
@@ -29,13 +35,74 @@ jobs:
       run: dotnet build --configuration Release --no-restore
 
     - name: 🧪 Run tests
-      run: dotnet test --configuration Release --no-restore --verbosity normal
+      run: dotnet test --configuration Release --no-build --no-restore --verbosity normal
 
     - name: 📦 Pack SDK
-      run: dotnet pack ./CronCraft/CronCraft.csproj --configuration Release --output ./nupkgs
+      run: |
+        dotnet pack ./CronCraft/CronCraft.csproj \
+          --configuration Release \
+          --no-build \
+          --output ./nupkgs \
+          /p:Version=${{ steps.version.outputs.version }}
 
     - name: 🚀 Publish to NuGet.org
-      run: dotnet nuget push ./nupkgs/*.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate
+      run: |
+        dotnet nuget push ./nupkgs/*.nupkg \
+          --api-key ${{ secrets.NUGET_API_KEY }} \
+          --source https://api.nuget.org/v3/index.json \
+          --skip-duplicate
 
-    - name: 📦 Publish to GitHub Packages 
-      run: dotnet nuget push ./nupkgs/*.nupkg --api-key ${{ secrets.GH_PACKAGES_TOKEN }} --source "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json"
+    - name: 📦 Publish to GitHub Packages
+      run: |
+        dotnet nuget push ./nupkgs/*.nupkg \
+          --api-key ${{ secrets.GH_PACKAGES_TOKEN }} \
+          --source "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json" \
+          --skip-duplicate
+
+    - name: 📝 Create GitHub Release
+      id: release
+      uses: softprops/action-gh-release@v2
+      with:
+        tag_name: ${{ github.ref_name }}
+        name: "CronCraft v${{ steps.version.outputs.version }}"
+        generate_release_notes: true   # auto-builds changelog from merged PR titles
+        files: ./nupkgs/*.nupkg
+
+    - name: 🙏 Thank contributors on their merged PRs
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        VERSION: ${{ steps.version.outputs.version }}
+        RELEASE_URL: ${{ steps.release.outputs.url }}
+      run: |
+        # Find the tag that came just before this one
+        PREV_TAG=$(git tag --sort=-version:refname | grep -v "^${GITHUB_REF_NAME}$" | head -1)
+
+        if [ -n "$PREV_TAG" ]; then
+          RANGE="${PREV_TAG}..HEAD"
+          echo "Scanning commits from ${PREV_TAG} to HEAD"
+        else
+          RANGE="HEAD"
+          echo "No previous tag found — scanning all commits"
+        fi
+
+        # Extract PR numbers from GitHub merge-commit messages ("Merge pull request #N")
+        PR_NUMBERS=$(git log $RANGE --merges --oneline \
+          | grep -oE '#[0-9]+' | grep -oE '[0-9]+' || true)
+
+        if [ -z "$PR_NUMBERS" ]; then
+          echo "No merged PRs found in this range."
+          exit 0
+        fi
+
+        for PR in $PR_NUMBERS; do
+          echo "Commenting on PR #${PR}..."
+          gh pr comment "$PR" --body \
+            "🎉 **Thank you for your contribution!**
+
+        This PR was included in [**CronCraft v${VERSION}**](${RELEASE_URL}) and is now live on NuGet for everyone to use. We really appreciate the time and effort you put in — it makes the library better for the whole community! 🚀
+
+        \`\`\`
+        dotnet add package CronCraft --version ${VERSION}
+        \`\`\`" \
+          2>/dev/null || echo "Skipped PR #${PR} — may already have a comment or access was denied."
+        done
