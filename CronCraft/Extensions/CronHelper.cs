@@ -97,6 +97,42 @@ public static class CronHelper
                 ? string.Format(value, args)
                 : string.Format(key, args);
 
+        // --- Quartz special characters: L, W, # ---
+
+        // day-of-week: 2#1 → "Every first Monday of the month"
+        // Quartz day-of-week is 1-based (1=Sun…7=Sat); daysMap is 0-based (0=Sun…6=Sat)
+        if (dayOfWeek.Contains('#'))
+        {
+            var nthResult = DescribeNthWeekday(dayOfWeek, daysMap);
+            return $"{nthResult} {Phrase("AtTime", time)}";
+        }
+
+        // day-of-week: 2L → "Last Monday of the month" (Quartz 1-based, convert to 0-based)
+        if (dayOfWeek.EndsWith('L') && dayOfWeek != "L")
+        {
+            var quartzDay = int.TryParse(dayOfWeek.TrimEnd('L'), out var qd) ? qd : -1;
+            var standardDay = (quartzDay - 1).ToString();
+            var dayName = daysMap.TryGetValue(standardDay, out var n) ? n : $"Day {standardDay}";
+            return $"Last {dayName} of the month {Phrase("AtTime", time)}";
+        }
+
+        // day-of-month: LW → "Last weekday of the month"
+        if (dayOfMonth.Equals("LW", StringComparison.OrdinalIgnoreCase))
+            return $"Last weekday of the month {Phrase("AtTime", time)}";
+
+        // day-of-month: L → "Last day of the month"
+        if (dayOfMonth == "L")
+            return $"Last day of the month {Phrase("AtTime", time)}";
+
+        // day-of-month: 15W → "Nearest weekday to the 15th"
+        if (dayOfMonth.EndsWith('W'))
+        {
+            var baseDay = Ordinal(dayOfMonth.TrimEnd('W'));
+            return $"Nearest weekday to the {baseDay} of the month {Phrase("AtTime", time)}";
+        }
+
+        // --- Standard patterns ---
+
         if (minute.StartsWith("*/") && hour == "*")
             return Phrase("EveryXMinutes", minute.Replace("*/", ""));
 
@@ -130,6 +166,26 @@ public static class CronHelper
         return cron;
     }
 
+    // "2#1" → "Every first Monday of the month"  (Quartz day 2 = Mon in 1-based, so subtract 1)
+    // "6#3" → "Every third Friday of the month"
+    private static string DescribeNthWeekday(string dayOfWeek, Dictionary<string, string> daysMap)
+    {
+        var hashParts = dayOfWeek.Split('#');
+        // Quartz uses 1-based day-of-week; daysMap is 0-based
+        var standardDay = int.TryParse(hashParts[0], out var qd) ? (qd - 1).ToString() : hashParts[0];
+        var dayName = daysMap.TryGetValue(standardDay, out var n) ? n : $"Day {standardDay}";
+        string occurrence = hashParts[1] switch
+        {
+            "1" => "first",
+            "2" => "second",
+            "3" => "third",
+            "4" => "fourth",
+            "5" => "fifth",
+            _ => $"{hashParts[1]}th"
+        };
+        return $"Every {occurrence} {dayName} of the month";
+    }
+
     private static string ConvertQuartzToCronos(string quartzCron)
     {
         string[] parts = quartzCron.Split(' ', StringSplitOptions.RemoveEmptyEntries);
@@ -140,6 +196,7 @@ public static class CronHelper
             string hour = parts[2];
             string day = parts[3];
             string month = parts[4];
+            // Preserve L/#-suffixed values; only replace a bare "?" with "*"
             string dayOfWeek = parts[5] == "?" ? "*" : parts[5];
 
             return $"{minute} {hour} {day} {month} {dayOfWeek}";
