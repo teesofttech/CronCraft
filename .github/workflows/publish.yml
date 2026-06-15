@@ -4,6 +4,11 @@ on:
   push:
     tags:
       - 'v*.*.*'  # Trigger only on version tags like v1.0.0
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to publish (e.g. 1.0.3) — only used when run manually'
+        required: true
 
 permissions:
   contents: write       # create GitHub Releases and read tags
@@ -24,9 +29,14 @@ jobs:
       with:
         dotnet-version: '8.0.x'
 
-    - name: 🏷 Extract version from tag
+    - name: 🏷 Extract version
       id: version
-      run: echo "version=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+      run: |
+        if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+          echo "version=${{ github.event.inputs.version }}" >> $GITHUB_OUTPUT
+        else
+          echo "version=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+        fi
 
     - name: 🔍 Restore dependencies
       run: dotnet restore
