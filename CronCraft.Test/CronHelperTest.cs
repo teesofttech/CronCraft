@@ -194,4 +194,86 @@ public sealed class CronHelperTest
 
         Assert.AreEqual(badCron, ex.CronExpression);
     }
+
+    // --- Quartz special characters: L, W, # ---
+
+    [TestMethod]
+    public void Test_L_LastDayOfMonth()
+    {
+        var settings = new CronSettings { Language = "en" };
+        string result = CronHelper.ToHumanReadable("0 0 L * ?", settings);
+        Assert.AreEqual("Last day of the month at 12:00 AM", result);
+    }
+
+    [TestMethod]
+    public void Test_LW_LastWeekdayOfMonth()
+    {
+        var settings = new CronSettings { Language = "en" };
+        string result = CronHelper.ToHumanReadable("0 0 LW * ?", settings);
+        Assert.AreEqual("Last weekday of the month at 12:00 AM", result);
+    }
+
+    [TestMethod]
+    public void Test_W_NearestWeekday()
+    {
+        var settings = new CronSettings { Language = "en" };
+        string result = CronHelper.ToHumanReadable("0 0 15W * ?", settings);
+        Assert.AreEqual("Nearest weekday to the 15th of the month at 12:00 AM", result);
+    }
+
+    [TestMethod]
+    public void Test_W_NearestWeekday_1st()
+    {
+        var settings = new CronSettings { Language = "en" };
+        string result = CronHelper.ToHumanReadable("0 9 1W * ?", settings);
+        Assert.AreEqual("Nearest weekday to the 1st of the month at 09:00 AM", result);
+    }
+
+    [TestMethod]
+    public void Test_Hash_NthWeekdayOfMonth_FirstMonday()
+    {
+        var settings = new CronSettings { Language = "en", DayNameFormat = "full" };
+        string result = CronHelper.ToHumanReadable("0 0 ? * 2#1", settings);
+        Assert.AreEqual("Every first Monday of the month at 12:00 AM", result);
+    }
+
+    [TestMethod]
+    public void Test_Hash_NthWeekdayOfMonth_ThirdFriday()
+    {
+        var settings = new CronSettings { Language = "en", DayNameFormat = "full" };
+        string result = CronHelper.ToHumanReadable("0 0 ? * 6#3", settings);
+        Assert.AreEqual("Every third Friday of the month at 12:00 AM", result);
+    }
+
+    [TestMethod]
+    public void Test_Hash_NthWeekdayOfMonth_SecondWednesday()
+    {
+        var settings = new CronSettings { Language = "en", DayNameFormat = "full" };
+        string result = CronHelper.ToHumanReadable("0 10 ? * 4#2", settings);
+        Assert.AreEqual("Every second Wednesday of the month at 10:00 AM", result);
+    }
+
+    [TestMethod]
+    public void Test_L_LastDayOfWeek_LastMonday()
+    {
+        var settings = new CronSettings { Language = "en", DayNameFormat = "full" };
+        string result = CronHelper.ToHumanReadable("0 0 ? * 2L", settings);
+        Assert.AreEqual("Last Monday of the month at 12:00 AM", result);
+    }
+
+    [TestMethod]
+    public void Test_L_LastDayOfWeek_LastFriday()
+    {
+        var settings = new CronSettings { Language = "en", DayNameFormat = "full" };
+        string result = CronHelper.ToHumanReadable("0 17 ? * 6L", settings);
+        Assert.AreEqual("Last Friday of the month at 05:00 PM", result);
+    }
+
+    [TestMethod]
+    public void Test_Hash_QuartzSixPart_FirstTuesday()
+    {
+        var settings = new CronSettings { Language = "en", DayNameFormat = "full" };
+        string result = CronHelper.ToHumanReadable("0 0 9 ? * 3#1", settings);
+        Assert.AreEqual("Every first Tuesday of the month at 09:00 AM", result);
+    }
 }
