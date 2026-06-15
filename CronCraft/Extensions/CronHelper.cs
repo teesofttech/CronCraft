@@ -1,4 +1,5 @@
-﻿using CronCraft.Models;
+﻿using CronCraft.Exceptions;
+using CronCraft.Models;
 using CronCraft.Providers;
 
 namespace CronCraft.Extensions;
@@ -11,8 +12,13 @@ public static class CronHelper
     /// <param name="settings"></param>
     /// <param name="timeZone"></param>
     /// <returns></returns>
+    /// <exception cref="ArgumentException">Thrown when <paramref name="cronExpression"/> is null or empty.</exception>
+    /// <exception cref="InvalidCronExpressionException">Thrown when <paramref name="cronExpression"/> is malformed.</exception>
     public static string ToHumanReadable(this string cronExpression, CronSettings settings, TimeZoneInfo timeZone = null)
     {
+        if (string.IsNullOrWhiteSpace(cronExpression))
+            throw new ArgumentException("Cron expression must not be null or empty.", nameof(cronExpression));
+
         return settings.Language.ToLower() switch
         {
             "es" => ToHumanReadableSpanish(cronExpression, settings, timeZone),
@@ -96,7 +102,8 @@ public static class CronHelper
     {
         var daysMap = DayNameProvider.GetDayMap(settings);
         string[] parts = ConvertQuartzToCronos(cron).Split(' ', StringSplitOptions.RemoveEmptyEntries);
-        if (parts.Length != 5) return "Invalid cron expression";
+        if (parts.Length != 5)
+            throw new InvalidCronExpressionException(cron, $"expected 5 parts but got {parts.Length}");
 
         string minute = parts[0], hour = parts[1], dayOfMonth = parts[2], month = parts[3], dayOfWeek = parts[4];
         string time = FormatTime(hour, minute, timeZone);
@@ -169,7 +176,7 @@ public static class CronHelper
         int m = int.TryParse(minute.Replace("*/", "0"), out int mParsed) ? mParsed : 0;
         DateTime utcTime = new DateTime(2000, 1, 1, h, m, 0, DateTimeKind.Utc);
         DateTime localTime = timeZone != null ? TimeZoneInfo.ConvertTimeFromUtc(utcTime, timeZone) : utcTime;
-        return localTime.ToString("hh:mm tt");
+        return localTime.ToString("hh:mm tt", System.Globalization.CultureInfo.InvariantCulture);
     }
 
     /// <summary>
