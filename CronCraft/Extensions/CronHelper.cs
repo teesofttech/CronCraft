@@ -1,4 +1,5 @@
-﻿using CronCraft.Models;
+using CronCraft.Exceptions;
+using CronCraft.Models;
 using CronCraft.Providers;
 
 namespace CronCraft.Extensions;
@@ -8,8 +9,17 @@ public static class CronHelper
     /// <summary>
     /// Converts a cron expression to a human-readable format based on language and settings.
     /// </summary>
+    /// <param name="cronExpression">The cron expression to convert.</param>
+    /// <param name="settings">The settings controlling language, day-name format, and timezone.</param>
+    /// <param name="timeZone">Optional timezone to convert UTC times into.</param>
+    /// <returns>A human-readable description of the cron schedule.</returns>
+    /// <exception cref="ArgumentException">Thrown when <paramref name="cronExpression"/> is null or empty.</exception>
+    /// <exception cref="InvalidCronExpressionException">Thrown when <paramref name="cronExpression"/> is malformed.</exception>
     public static string ToHumanReadable(this string cronExpression, CronSettings settings, TimeZoneInfo? timeZone = null)
     {
+        if (string.IsNullOrWhiteSpace(cronExpression))
+            throw new ArgumentException("Cron expression must not be null or empty.", nameof(cronExpression));
+
         return settings.Language.ToLower() switch
         {
             "es" => ToHumanReadableSpanish(cronExpression, settings, timeZone),
@@ -72,7 +82,7 @@ public static class CronHelper
             .Split(' ', StringSplitOptions.RemoveEmptyEntries);
 
         if (parts.Length != 5)
-            return "Invalid cron expression";
+            throw new InvalidCronExpressionException(cron, $"expected 5 parts but got {parts.Length}");
 
         string minute = parts[0];
         string hour = parts[1];
@@ -149,7 +159,7 @@ public static class CronHelper
             ? TimeZoneInfo.ConvertTimeFromUtc(utcTime, timeZone)
             : utcTime;
 
-        return localTime.ToString("hh:mm tt");
+        return localTime.ToString("hh:mm tt", System.Globalization.CultureInfo.InvariantCulture);
     }
 
     private static string Ordinal(string number)

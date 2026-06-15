@@ -1,4 +1,5 @@
-﻿using CronCraft.Extensions;
+using CronCraft.Exceptions;
+using CronCraft.Extensions;
 using CronCraft.Models;
 
 namespace CronCraft.Test;
@@ -137,5 +138,60 @@ public sealed class CronHelperTest
 
         string result = CronHelper.ToHumanReadable("0 0 12 1/1 * ? *", settings, null);
         Assert.AreEqual("Every month on the 1st at 12:00 PM", result);
+    }
+
+    [TestMethod]
+    public void Test_NullExpression_ThrowsArgumentException()
+    {
+        var settings = CreateCustomSettings();
+        Assert.ThrowsException<ArgumentException>(() =>
+            CronHelper.ToHumanReadable(null!, settings));
+    }
+
+    [TestMethod]
+    public void Test_EmptyExpression_ThrowsArgumentException()
+    {
+        var settings = CreateCustomSettings();
+        Assert.ThrowsException<ArgumentException>(() =>
+            CronHelper.ToHumanReadable("", settings));
+    }
+
+    [TestMethod]
+    public void Test_WhitespaceExpression_ThrowsArgumentException()
+    {
+        var settings = CreateCustomSettings();
+        Assert.ThrowsException<ArgumentException>(() =>
+            CronHelper.ToHumanReadable("   ", settings));
+    }
+
+    [TestMethod]
+    public void Test_TooFewParts_ThrowsInvalidCronExpressionException()
+    {
+        var settings = CreateCustomSettings();
+        var ex = Assert.ThrowsException<InvalidCronExpressionException>(() =>
+            CronHelper.ToHumanReadable("* * *", settings));
+
+        StringAssert.Contains(ex.Message, "expected 5 parts but got 3");
+    }
+
+    [TestMethod]
+    public void Test_TooManyParts_ThrowsInvalidCronExpressionException()
+    {
+        var settings = CreateCustomSettings();
+        var ex = Assert.ThrowsException<InvalidCronExpressionException>(() =>
+            CronHelper.ToHumanReadable("* * * * * * * *", settings));
+
+        StringAssert.Contains(ex.Message, "expected 5 parts but got 8");
+    }
+
+    [TestMethod]
+    public void Test_InvalidCronExpressionException_ContainsOffendingExpression()
+    {
+        var settings = CreateCustomSettings();
+        const string badCron = "bad expression";
+        var ex = Assert.ThrowsException<InvalidCronExpressionException>(() =>
+            CronHelper.ToHumanReadable(badCron, settings));
+
+        Assert.AreEqual(badCron, ex.CronExpression);
     }
 }
