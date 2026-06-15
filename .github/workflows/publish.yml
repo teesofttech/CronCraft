@@ -13,7 +13,6 @@ on:
 permissions:
   contents: write       # create GitHub Releases and read tags
   pull-requests: write  # comment on merged PRs
-  packages: write       # publish to GitHub Packages
 
 jobs:
   build-test-pack-publish:
@@ -61,13 +60,6 @@ jobs:
         dotnet nuget push ./nupkgs/*.nupkg \
           --api-key ${{ secrets.NUGET_API_KEY }} \
           --source https://api.nuget.org/v3/index.json \
-          --skip-duplicate
-
-    - name: 📦 Publish to GitHub Packages
-      run: |
-        dotnet nuget push ./nupkgs/*.nupkg \
-          --api-key ${{ secrets.GITHUB_TOKEN }} \
-          --source "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json" \
           --skip-duplicate
 
     - name: 📝 Create GitHub Release
