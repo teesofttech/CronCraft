@@ -131,7 +131,26 @@ public static class CronHelper
             return $"Nearest weekday to the {baseDay} of the month {Phrase("AtTime", time)}";
         }
 
-        // --- Standard patterns ---
+        // --- Range and list patterns ---
+
+        if (TryDescribeTimePattern(hour, minute, timeZone, out var timePattern))
+        {
+            if (dayOfWeek != "*" && dayOfWeek != "?")
+                return $"{timePattern} on {JoinDays(dayOfWeek, daysMap)}";
+
+            if (dayOfMonth != "*")
+                return $"{timePattern} on the {DescribeOrdinals(dayOfMonth)} of every month";
+
+            return timePattern.StartsWith("At ", StringComparison.Ordinal)
+                ? $"Every day at {timePattern[3..]}"
+                : timePattern;
+        }
+
+        if (dayOfMonth.Contains('-') && (dayOfWeek == "*" || dayOfWeek == "?"))
+        {
+            var dayRange = DescribeOrdinals(dayOfMonth);
+            return $"Every day from the {dayRange} {Phrase("AtTime", time)}";
+        }
 
         if (minute.StartsWith("*/") && hour == "*")
             return Phrase("EveryXMinutes", minute.Replace("*/", ""));
@@ -156,11 +175,11 @@ public static class CronHelper
                 ? $"Every {month.Replace("*/", "")} months"
                 : "Every month";
 
-            return $"{monthDesc} on the {Ordinal(dayOfMonth)} {Phrase("AtTime", time)}";
+            return $"{monthDesc} on the {DescribeOrdinals(dayOfMonth)} {Phrase("AtTime", time)}";
         }
 
         if (dayOfMonth != "*" && dayOfWeek != "*")
-            return Phrase("OnDayAndWeek", Ordinal(dayOfMonth), JoinDays(dayOfWeek, daysMap))
+            return Phrase("OnDayAndWeek", DescribeOrdinals(dayOfMonth), JoinDays(dayOfWeek, daysMap))
                    + " " + Phrase("AtTime", time);
 
         return cron;
@@ -210,7 +229,12 @@ public static class CronHelper
         int h = int.TryParse(hour.Replace("*/", "0"), out var hParsed) ? hParsed : 0;
         int m = int.TryParse(minute.Replace("*/", "0"), out var mParsed) ? mParsed : 0;
 
-        DateTime utcTime = new DateTime(2000, 1, 1, h, m, 0, DateTimeKind.Utc);
+        return FormatTime(h, m, timeZone);
+    }
+
+    private static string FormatTime(int hour, int minute, TimeZoneInfo? timeZone)
+    {
+        DateTime utcTime = new DateTime(2000, 1, 1, hour, minute, 0, DateTimeKind.Utc);
 
         DateTime localTime = timeZone != null
             ? TimeZoneInfo.ConvertTimeFromUtc(utcTime, timeZone)
@@ -237,27 +261,164 @@ public static class CronHelper
         };
     }
 
+    private static string DescribeOrdinals(string expression)
+    {
+        var descriptions = expression
+            .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+            .Select(part =>
+            {
+                var bounds = part.Split('-', StringSplitOptions.TrimEntries);
+                return bounds.Length == 2
+                    ? $"{Ordinal(bounds[0])} through the {Ordinal(bounds[1])}"
+                    : Ordinal(part);
+            })
+            .ToList();
+
+        return JoinDescriptions(descriptions);
+    }
+
+    private static bool TryDescribeTimePattern(
+        string hour,
+        string minute,
+        TimeZoneInfo? timeZone,
+        out string description)
+    {
+        description = string.Empty;
+
+        if (hour.Contains('-') && int.TryParse(minute, out var fixedMinute))
+        {
+            var bounds = hour.Split('-', StringSplitOptions.TrimEntries);
+            if (bounds.Length == 2 &&
+                int.TryParse(bounds[0], out var startHour) &&
+                int.TryParse(bounds[1], out var endHour))
+            {
+                description =
+                    $"Every hour from {FormatTime(startHour, fixedMinute, timeZone)} to {FormatTime(endHour, fixedMinute, timeZone)}";
+                return true;
+            }
+        }
+
+        if (minute.Contains('-') && int.TryParse(hour, out var fixedHour))
+        {
+            var bounds = minute.Split('-', StringSplitOptions.TrimEntries);
+            if (bounds.Length == 2 &&
+                int.TryParse(bounds[0], out var startMinute) &&
+                int.TryParse(bounds[1], out var endMinute))
+            {
+                description =
+                    $"Every minute from {FormatTime(fixedHour, startMinute, timeZone)} to {FormatTime(fixedHour, endMinute, timeZone)}";
+                return true;
+            }
+        }
+
+        if ((hour.Contains(',') || minute.Contains(',')) &&
+            TryExpandValues(hour, out var hours) &&
+            TryExpandValues(minute, out var minutes))
+        {
+            var times = (
+                from parsedHour in hours
+                from parsedMinute in minutes
+                select FormatTime(parsedHour, parsedMinute, timeZone))
+                .ToList();
+
+            description = $"At {JoinDescriptions(times)}";
+            return true;
+        }
+
+        return false;
+    }
+
+    private static bool TryExpandValues(string expression, out List<int> values)
+    {
+        values = [];
+
+        foreach (var part in expression.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+        {
+            var bounds = part.Split('-', StringSplitOptions.TrimEntries);
+            if (bounds.Length == 1 && int.TryParse(bounds[0], out var value))
+            {
+                values.Add(value);
+                continue;
+            }
+
+            if (bounds.Length == 2 &&
+                int.TryParse(bounds[0], out var start) &&
+                int.TryParse(bounds[1], out var end) &&
+                start <= end)
+            {
+                values.AddRange(Enumerable.Range(start, end - start + 1));
+                continue;
+            }
+
+            values = [];
+            return false;
+        }
+
+        return values.Count > 0;
+    }
+
     private static bool IsAllDays(string dayOfWeek)
     {
         HashSet<string> all = new() { "0", "1", "2", "3", "4", "5", "6" };
-        HashSet<string> input = dayOfWeek.Split(',').ToHashSet();
+        HashSet<string> input = ExpandDayValues(dayOfWeek)
+            .Select(day => day == "7" ? "0" : day)
+            .ToHashSet();
         return input.SetEquals(all);
     }
 
     private static string JoinDays(string dayOfWeek, Dictionary<string, string> daysMap)
     {
         var days = dayOfWeek
-            .Split(',')
-            .Select(d => daysMap.TryGetValue(d, out var name) ? name : $"Day {d}")
+            .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+            .Select(part => DescribeDayPart(part, daysMap))
             .Distinct()
             .ToList();
 
-        return days.Count switch
+        return JoinDescriptions(days, "days");
+    }
+
+    private static string DescribeDayPart(string part, Dictionary<string, string> daysMap)
+    {
+        var bounds = part.Split('-', StringSplitOptions.TrimEntries);
+        if (bounds.Length == 2)
         {
-            > 2 => string.Join(", ", days.Take(days.Count - 1)) + " and " + days.Last(),
-            2 => days[0] + " and " + days[1],
-            1 => days[0],
-            _ => "days",
+            return $"{GetDayName(bounds[0], daysMap)} through {GetDayName(bounds[1], daysMap)}";
+        }
+
+        return GetDayName(part, daysMap);
+    }
+
+    private static string GetDayName(string day, Dictionary<string, string> daysMap) =>
+        daysMap.TryGetValue(day, out var name) ? name : $"Day {day}";
+
+    private static IEnumerable<string> ExpandDayValues(string expression)
+    {
+        foreach (var part in expression.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+        {
+            var bounds = part.Split('-', StringSplitOptions.TrimEntries);
+            if (bounds.Length == 2 &&
+                int.TryParse(bounds[0], out var start) &&
+                int.TryParse(bounds[1], out var end) &&
+                start <= end)
+            {
+                foreach (var day in Enumerable.Range(start, end - start + 1))
+                    yield return day.ToString();
+            }
+            else
+            {
+                yield return part;
+            }
+        }
+    }
+
+    private static string JoinDescriptions(IReadOnlyList<string> descriptions, string fallback = "")
+    {
+        return descriptions.Count switch
+        {
+            > 2 => string.Join(", ", descriptions.Take(descriptions.Count - 1)) + " and " + descriptions[^1],
+            2 => descriptions[0] + " and " + descriptions[1],
+            1 => descriptions[0],
+            _ => fallback,
         };
     }
 }
