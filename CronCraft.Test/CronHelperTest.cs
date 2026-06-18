@@ -54,6 +54,88 @@ public sealed class CronHelperTest
     }
 
     [TestMethod]
+    public void Test_DayOfWeekRange()
+    {
+        var settings = CreateCustomSettings();
+
+        string result = CronHelper.ToHumanReadable("0 9 * * 1-5", settings);
+
+        Assert.AreEqual("Every Monday through Friday at 09:00 AM", result);
+    }
+
+    [TestMethod]
+    public void Test_DayOfWeekRangeAndList()
+    {
+        var settings = CreateCustomSettings();
+
+        string result = CronHelper.ToHumanReadable("0 9 * * 1-5,7", settings);
+
+        Assert.AreEqual("Every Monday through Friday and Sunday at 09:00 AM", result);
+    }
+
+    [TestMethod]
+    public void Test_HourRangeOnWeekdays()
+    {
+        var settings = CreateCustomSettings();
+
+        string result = CronHelper.ToHumanReadable("0 8-17 * * 1-5", settings);
+
+        Assert.AreEqual(
+            "Every hour from 08:00 AM to 05:00 PM on Monday through Friday",
+            result);
+    }
+
+    [TestMethod]
+    public void Test_HourList()
+    {
+        var settings = CreateCustomSettings();
+
+        string result = CronHelper.ToHumanReadable("0 8,12,17 * * *", settings);
+
+        Assert.AreEqual("Every day at 08:00 AM, 12:00 PM and 05:00 PM", result);
+    }
+
+    [TestMethod]
+    public void Test_MinuteRange()
+    {
+        var settings = CreateCustomSettings();
+
+        string result = CronHelper.ToHumanReadable("0-30 9 * * *", settings);
+
+        Assert.AreEqual("Every minute from 09:00 AM to 09:30 AM", result);
+    }
+
+    [TestMethod]
+    public void Test_MinuteList()
+    {
+        var settings = CreateCustomSettings();
+
+        string result = CronHelper.ToHumanReadable("0,15,30 9 * * *", settings);
+
+        Assert.AreEqual("Every day at 09:00 AM, 09:15 AM and 09:30 AM", result);
+    }
+
+    [TestMethod]
+    public void Test_DayOfMonthRange()
+    {
+        var settings = CreateCustomSettings();
+
+        string result = CronHelper.ToHumanReadable("0 0 1-7 * *", settings);
+
+        Assert.AreEqual("Every day from the 1st through the 7th at 12:00 AM", result);
+    }
+
+    [TestMethod]
+    public void Test_DayOfMonthList()
+    {
+        var settings = CreateCustomSettings();
+
+        string result = CronHelper.ToHumanReadable("0 9 1,15,30 * *", settings);
+
+        Assert.AreEqual("Every month on the 1st, 15th and 30th at 09:00 AM", result);
+    }
+
+    [TestMethod]
     public void Test_EveryDayAtSpecificTime()
     {
         var settings = new CronSettings { DayNameFormat = "short" };
