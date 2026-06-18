@@ -11,7 +11,7 @@ CronCraft is designed for **clarity, speed, and minimal setup**.
 
 Whether you're building a **web app**, a **CLI tool**, a **Windows Service**, or a **background worker** — just create a `CronSettings` object, and you're good to go.
 
-> ❝ No dependency injection. No appsettings. Just clean, functional cron parsing. ❞
+> ❝ No dependency injection required. No appsettings. Just clean, functional cron parsing. ❞
 
 ---
 
@@ -21,6 +21,7 @@ Whether you're building a **web app**, a **CLI tool**, a **Windows Service**, or
 - 🌍 Localized day-of-week formatting (`short`, `full`, `single`, or custom)
 - 🕘 Time zone adjustment (optional)
 - 🔧 Fully configurable via `CronSettings` object
+- 💉 Optional dependency injection registration with `AddCronCraft`
 - 📦 Lightweight, zero-dependency core logic
 
 ---
@@ -62,6 +63,30 @@ humanReadable = cronExpression.ToHumanReadable(settings, timeZone);
 Console.WriteLine($"📖 Human Readable (Local TZ): {humanReadable}");
 
 Console.ReadLine();
+```
+
+### Dependency Injection
+
+For ASP.NET Core and generic host applications, register CronCraft through
+`IServiceCollection`:
+
+```csharp
+using CronCraft.Extensions;
+
+builder.Services.AddCronCraft(settings =>
+{
+    settings.Language = "en";
+    settings.DayNameFormat = "short";
+});
+```
+
+Then inject `CronCraftService` where it is needed:
+
+```csharp
+public class MyScheduler(CronCraftService cronCraft)
+{
+    public string Describe(string expression) => cronCraft.Convert(expression);
+}
 ```
 
 **Expected Output:**
