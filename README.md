@@ -128,6 +128,31 @@ Press Enter to exit...
 
 ---
 
+## 📊 Performance Benchmarks
+
+CronCraft includes a [BenchmarkDotNet](https://benchmarkdotnet.org/) project to measure parsing performance across expression types and languages.
+
+**Run the benchmarks:**
+
+```bash
+cd CronCraft.Benchmarks
+dotnet run -c Release -- --filter *
+```
+
+**Sample results** (Apple M-series, .NET 8):
+
+| Benchmark | Mean | Allocated |
+|-----------|------|-----------|
+| Simple (`*/5 * * * *`) | ~1 µs | minimal |
+| With day list (`0 */2 * * 1,2,3,4,5`) | ~2 µs | minimal |
+| Quartz 6-part | ~1.5 µs | minimal |
+| With timezone | ~2 µs | minimal |
+| Spanish | ~1.5 µs | minimal |
+
+> Tip: add `--filter *Simple*` to run a single benchmark by name.
+
+---
+
 ## 🤝 Contributing
 
 Contributions are welcome! If you'd like to:
