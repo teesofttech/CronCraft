@@ -6,7 +6,8 @@
     public class CronSettings
     {
         /// <summary>
-        /// Language used for output formatting (e.g., "en", "es", "fr").
+        /// Language used for output formatting.
+        /// Supported values: "en", "es", "fr", "de", "pt", "it", "nl", "zh", and "ja".
         /// Default is "en".
         /// </summary>
         public string Language { get; set; } = "en";

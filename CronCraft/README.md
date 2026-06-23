@@ -117,6 +117,12 @@ Press Enter to exit...
 - English (`en`)
 - Spanish (`es`)
 - French (`fr`)
+- German (`de`)
+- Portuguese (`pt`)
+- Italian (`it`)
+- Dutch (`nl`)
+- Simplified Chinese (`zh`)
+- Japanese (`ja`)
 - Easily extendable via custom mappings
 
 ---

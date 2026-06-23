@@ -4,6 +4,12 @@ namespace CronCraft.Providers;
 
 public static class DayNameProvider
 {
+    private static Dictionary<string, string> CreateDayMap(params string[] names) => new()
+    {
+        { "0", names[0] }, { "1", names[1] }, { "2", names[2] }, { "3", names[3] },
+        { "4", names[4] }, { "5", names[5] }, { "6", names[6] }, { "7", names[0] }
+    };
+
     private static readonly Dictionary<string, string> SingleEnglish = new()
     {
         { "0", "S" }, { "1", "M" }, { "2", "T" }, { "3", "W" },
@@ -60,6 +66,48 @@ public static class DayNameProvider
         { "4", "J" }, { "5", "V" }, { "6", "S" }, { "7", "D" }
     };
 
+    private static readonly Dictionary<string, string> FullGerman =
+        CreateDayMap("Sonntag", "Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag");
+    private static readonly Dictionary<string, string> ShortGerman =
+        CreateDayMap("So", "Mo", "Di", "Mi", "Do", "Fr", "Sa");
+    private static readonly Dictionary<string, string> SingleGerman =
+        CreateDayMap("S", "M", "D", "M", "D", "F", "S");
+
+    private static readonly Dictionary<string, string> FullPortuguese =
+        CreateDayMap("Domingo", "Segunda-feira", "Terça-feira", "Quarta-feira", "Quinta-feira", "Sexta-feira", "Sábado");
+    private static readonly Dictionary<string, string> ShortPortuguese =
+        CreateDayMap("Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb");
+    private static readonly Dictionary<string, string> SinglePortuguese =
+        CreateDayMap("D", "S", "T", "Q", "Q", "S", "S");
+
+    private static readonly Dictionary<string, string> FullItalian =
+        CreateDayMap("Domenica", "Lunedì", "Martedì", "Mercoledì", "Giovedì", "Venerdì", "Sabato");
+    private static readonly Dictionary<string, string> ShortItalian =
+        CreateDayMap("Dom", "Lun", "Mar", "Mer", "Gio", "Ven", "Sab");
+    private static readonly Dictionary<string, string> SingleItalian =
+        CreateDayMap("D", "L", "M", "M", "G", "V", "S");
+
+    private static readonly Dictionary<string, string> FullDutch =
+        CreateDayMap("Zondag", "Maandag", "Dinsdag", "Woensdag", "Donderdag", "Vrijdag", "Zaterdag");
+    private static readonly Dictionary<string, string> ShortDutch =
+        CreateDayMap("Zo", "Ma", "Di", "Wo", "Do", "Vr", "Za");
+    private static readonly Dictionary<string, string> SingleDutch =
+        CreateDayMap("Z", "M", "D", "W", "D", "V", "Z");
+
+    private static readonly Dictionary<string, string> FullChinese =
+        CreateDayMap("星期日", "星期一", "星期二", "星期三", "星期四", "星期五", "星期六");
+    private static readonly Dictionary<string, string> ShortChinese =
+        CreateDayMap("周日", "周一", "周二", "周三", "周四", "周五", "周六");
+    private static readonly Dictionary<string, string> SingleChinese =
+        CreateDayMap("日", "一", "二", "三", "四", "五", "六");
+
+    private static readonly Dictionary<string, string> FullJapanese =
+        CreateDayMap("日曜日", "月曜日", "火曜日", "水曜日", "木曜日", "金曜日", "土曜日");
+    private static readonly Dictionary<string, string> ShortJapanese =
+        CreateDayMap("日曜", "月曜", "火曜", "水曜", "木曜", "金曜", "土曜");
+    private static readonly Dictionary<string, string> SingleJapanese =
+        CreateDayMap("日", "月", "火", "水", "木", "金", "土");
+
     public static Dictionary<string, string> GetDayMap(CronSettings settings)
     {
         var format = settings.DayNameFormat?.ToLowerInvariant() ?? "short";
@@ -80,10 +128,28 @@ public static class DayNameProvider
         {
             ("single", "es") => SingleSpanish,
             ("single", "fr") => SingleFrench,
+            ("single", "de") => SingleGerman,
+            ("single", "pt") => SinglePortuguese,
+            ("single", "it") => SingleItalian,
+            ("single", "nl") => SingleDutch,
+            ("single", "zh") => SingleChinese,
+            ("single", "ja") => SingleJapanese,
             ("short", "es") => ShortSpanish,
             ("short", "fr") => ShortFrench,
+            ("short", "de") => ShortGerman,
+            ("short", "pt") => ShortPortuguese,
+            ("short", "it") => ShortItalian,
+            ("short", "nl") => ShortDutch,
+            ("short", "zh") => ShortChinese,
+            ("short", "ja") => ShortJapanese,
             ("full", "es") => FullSpanish,
             ("full", "fr") => FullFrench,
+            ("full", "de") => FullGerman,
+            ("full", "pt") => FullPortuguese,
+            ("full", "it") => FullItalian,
+            ("full", "nl") => FullDutch,
+            ("full", "zh") => FullChinese,
+            ("full", "ja") => FullJapanese,
             ("full", _) => FullEnglish,
             ("single", _) => SingleEnglish,
             _ => ShortEnglish

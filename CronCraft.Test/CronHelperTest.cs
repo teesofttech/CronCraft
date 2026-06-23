@@ -358,4 +358,91 @@ public sealed class CronHelperTest
         string result = CronHelper.ToHumanReadable("0 0 9 ? * 3#1", settings);
         Assert.AreEqual("Every first Tuesday of the month at 09:00 AM", result);
     }
+
+    [DataTestMethod]
+    [DataRow("*/5 * * * *", "short", "Alle 5 Minuten")]
+    [DataRow("0 */2 * * *", "short", "Alle 2 Stunden")]
+    [DataRow("0 9 * * 1", "full", "Jeden Montag um 09:00 Uhr")]
+    [DataRow("0 9 * * 1", "short", "Jeden Mo um 09:00 Uhr")]
+    [DataRow("0 9 * * 1", "single", "Jeden M um 09:00 Uhr")]
+    [DataRow("0 9 15 * *", "short", "Jeden Monat am 15. um 09:00 Uhr")]
+    public void Test_GermanLocalization(string cron, string dayNameFormat, string expected)
+    {
+        AssertLocalized("de", cron, dayNameFormat, expected);
+    }
+
+    [DataTestMethod]
+    [DataRow("*/5 * * * *", "short", "A cada 5 minutos")]
+    [DataRow("0 */2 * * *", "short", "A cada 2 horas")]
+    [DataRow("0 9 * * 1", "full", "Em Segunda-feira às 09:00")]
+    [DataRow("0 9 * * 1", "short", "Em Seg às 09:00")]
+    [DataRow("0 9 * * 1", "single", "Em S às 09:00")]
+    [DataRow("0 9 15 * *", "short", "Todo mês no dia 15º às 09:00")]
+    public void Test_PortugueseLocalization(string cron, string dayNameFormat, string expected)
+    {
+        AssertLocalized("pt", cron, dayNameFormat, expected);
+    }
+
+    [DataTestMethod]
+    [DataRow("*/5 * * * *", "short", "Ogni 5 minuti")]
+    [DataRow("0 */2 * * *", "short", "Ogni 2 ore")]
+    [DataRow("0 9 * * 1", "full", "Ogni Lunedì alle 09:00")]
+    [DataRow("0 9 * * 1", "short", "Ogni Lun alle 09:00")]
+    [DataRow("0 9 * * 1", "single", "Ogni L alle 09:00")]
+    [DataRow("0 9 15 * *", "short", "Ogni mese il giorno 15 alle 09:00")]
+    public void Test_ItalianLocalization(string cron, string dayNameFormat, string expected)
+    {
+        AssertLocalized("it", cron, dayNameFormat, expected);
+    }
+
+    [DataTestMethod]
+    [DataRow("*/5 * * * *", "short", "Elke 5 minuten")]
+    [DataRow("0 */2 * * *", "short", "Elke 2 uur")]
+    [DataRow("0 9 * * 1", "full", "Elke Maandag om 09:00")]
+    [DataRow("0 9 * * 1", "short", "Elke Ma om 09:00")]
+    [DataRow("0 9 * * 1", "single", "Elke M om 09:00")]
+    [DataRow("0 9 15 * *", "short", "Elke maand op de 15e om 09:00")]
+    public void Test_DutchLocalization(string cron, string dayNameFormat, string expected)
+    {
+        AssertLocalized("nl", cron, dayNameFormat, expected);
+    }
+
+    [DataTestMethod]
+    [DataRow("*/5 * * * *", "short", "每 5 分钟")]
+    [DataRow("0 */2 * * *", "short", "每 2 小时")]
+    [DataRow("0 9 * * 1", "full", "每星期一 09:00")]
+    [DataRow("0 9 * * 1", "short", "每周一 09:00")]
+    [DataRow("0 9 * * 1", "single", "每一 09:00")]
+    [DataRow("0 9 15 * *", "short", "每月第 15 天 09:00")]
+    public void Test_ChineseLocalization(string cron, string dayNameFormat, string expected)
+    {
+        AssertLocalized("zh", cron, dayNameFormat, expected);
+    }
+
+    [DataTestMethod]
+    [DataRow("*/5 * * * *", "short", "5分ごと")]
+    [DataRow("0 */2 * * *", "short", "2時間ごと")]
+    [DataRow("0 9 * * 1", "full", "毎週月曜日 09:00に")]
+    [DataRow("0 9 * * 1", "short", "毎週月曜 09:00に")]
+    [DataRow("0 9 * * 1", "single", "毎週月 09:00に")]
+    [DataRow("0 9 15 * *", "short", "毎月15日 09:00に")]
+    public void Test_JapaneseLocalization(string cron, string dayNameFormat, string expected)
+    {
+        AssertLocalized("ja", cron, dayNameFormat, expected);
+    }
+
+    private static void AssertLocalized(
+        string language,
+        string cron,
+        string dayNameFormat,
+        string expected)
+    {
+        var settings = new CronSettings
+        {
+            Language = language,
+            DayNameFormat = dayNameFormat
+        };
+
+        Assert.AreEqual(expected, CronHelper.ToHumanReadable(cron, settings));
+    }
 }
