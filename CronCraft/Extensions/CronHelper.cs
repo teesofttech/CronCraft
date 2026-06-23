@@ -24,6 +24,12 @@ public static class CronHelper
         {
             "es" => ToHumanReadableSpanish(cronExpression, settings, timeZone),
             "fr" => ToHumanReadableFrench(cronExpression, settings, timeZone),
+            "de" => ToHumanReadableGerman(cronExpression, settings, timeZone),
+            "pt" => ToHumanReadablePortuguese(cronExpression, settings, timeZone),
+            "it" => ToHumanReadableItalian(cronExpression, settings, timeZone),
+            "nl" => ToHumanReadableDutch(cronExpression, settings, timeZone),
+            "zh" => ToHumanReadableChinese(cronExpression, settings, timeZone),
+            "ja" => ToHumanReadableJapanese(cronExpression, settings, timeZone),
             _ => ToHumanReadableEnglish(cronExpression, settings, timeZone)
         };
     }
@@ -38,7 +44,10 @@ public static class CronHelper
             ["EveryXHours"] = "Every {0} hours",
             ["EveryXHoursOn"] = "Every {0} hours on {1}",
             ["EveryMonthOnDay"] = "Every month on the {0}",
-            ["OnDayAndWeek"] = "On {0} and {1}"
+            ["OnDayAndWeek"] = "On {0} and {1}",
+            ["EveryDayOfWeek"] = "Every {0}",
+            ["EveryXMonthsOnDay"] = "Every {0} months on the {1}",
+            ["TimeFormat"] = "12"
         });
     }
 
@@ -52,7 +61,10 @@ public static class CronHelper
             ["EveryXHours"] = "Cada {0} horas",
             ["EveryXHoursOn"] = "Cada {0} horas los {1}",
             ["EveryMonthOnDay"] = "Cada mes el día {0}",
-            ["OnDayAndWeek"] = "El {0} y los {1}"
+            ["OnDayAndWeek"] = "El {0} y los {1}",
+            ["EveryDayOfWeek"] = "Cada {0}",
+            ["EveryXMonthsOnDay"] = "Cada {0} meses el día {1}",
+            ["TimeFormat"] = "12"
         });
     }
 
@@ -66,9 +78,102 @@ public static class CronHelper
             ["EveryXHours"] = "Toutes les {0} heures",
             ["EveryXHoursOn"] = "Toutes les {0} heures le {1}",
             ["EveryMonthOnDay"] = "Chaque mois le {0}",
-            ["OnDayAndWeek"] = "Le {0} et le {1}"
+            ["OnDayAndWeek"] = "Le {0} et le {1}",
+            ["EveryDayOfWeek"] = "Chaque {0}",
+            ["EveryXMonthsOnDay"] = "Tous les {0} mois le {1}",
+            ["TimeFormat"] = "12"
         });
     }
+
+    private static string ToHumanReadableGerman(string cron, CronSettings settings, TimeZoneInfo? timeZone) =>
+        BuildHumanReadable(cron, settings, timeZone, new Dictionary<string, string>
+        {
+            ["EveryDay"] = "Jeden Tag",
+            ["AtTime"] = "um {0} Uhr",
+            ["EveryXMinutes"] = "Alle {0} Minuten",
+            ["EveryXHours"] = "Alle {0} Stunden",
+            ["EveryXHoursOn"] = "Alle {0} Stunden am {1}",
+            ["EveryMonthOnDay"] = "Jeden Monat am {0}",
+            ["OnDayAndWeek"] = "Am {0} und am {1}",
+            ["EveryDayOfWeek"] = "Jeden {0}",
+            ["EveryXMonthsOnDay"] = "Alle {0} Monate am {1}",
+            ["TimeFormat"] = "24"
+        });
+
+    private static string ToHumanReadablePortuguese(string cron, CronSettings settings, TimeZoneInfo? timeZone) =>
+        BuildHumanReadable(cron, settings, timeZone, new Dictionary<string, string>
+        {
+            ["EveryDay"] = "Todos os dias",
+            ["AtTime"] = "às {0}",
+            ["EveryXMinutes"] = "A cada {0} minutos",
+            ["EveryXHours"] = "A cada {0} horas",
+            ["EveryXHoursOn"] = "A cada {0} horas em {1}",
+            ["EveryMonthOnDay"] = "Todo mês no dia {0}",
+            ["OnDayAndWeek"] = "No dia {0} e em {1}",
+            ["EveryDayOfWeek"] = "Em {0}",
+            ["EveryXMonthsOnDay"] = "A cada {0} meses no dia {1}",
+            ["TimeFormat"] = "24"
+        });
+
+    private static string ToHumanReadableItalian(string cron, CronSettings settings, TimeZoneInfo? timeZone) =>
+        BuildHumanReadable(cron, settings, timeZone, new Dictionary<string, string>
+        {
+            ["EveryDay"] = "Ogni giorno",
+            ["AtTime"] = "alle {0}",
+            ["EveryXMinutes"] = "Ogni {0} minuti",
+            ["EveryXHours"] = "Ogni {0} ore",
+            ["EveryXHoursOn"] = "Ogni {0} ore di {1}",
+            ["EveryMonthOnDay"] = "Ogni mese il giorno {0}",
+            ["OnDayAndWeek"] = "Il giorno {0} e di {1}",
+            ["EveryDayOfWeek"] = "Ogni {0}",
+            ["EveryXMonthsOnDay"] = "Ogni {0} mesi il giorno {1}",
+            ["TimeFormat"] = "24"
+        });
+
+    private static string ToHumanReadableDutch(string cron, CronSettings settings, TimeZoneInfo? timeZone) =>
+        BuildHumanReadable(cron, settings, timeZone, new Dictionary<string, string>
+        {
+            ["EveryDay"] = "Elke dag",
+            ["AtTime"] = "om {0}",
+            ["EveryXMinutes"] = "Elke {0} minuten",
+            ["EveryXHours"] = "Elke {0} uur",
+            ["EveryXHoursOn"] = "Elke {0} uur op {1}",
+            ["EveryMonthOnDay"] = "Elke maand op de {0}",
+            ["OnDayAndWeek"] = "Op de {0} en op {1}",
+            ["EveryDayOfWeek"] = "Elke {0}",
+            ["EveryXMonthsOnDay"] = "Elke {0} maanden op de {1}",
+            ["TimeFormat"] = "24"
+        });
+
+    private static string ToHumanReadableChinese(string cron, CronSettings settings, TimeZoneInfo? timeZone) =>
+        BuildHumanReadable(cron, settings, timeZone, new Dictionary<string, string>
+        {
+            ["EveryDay"] = "每天",
+            ["AtTime"] = "{0}",
+            ["EveryXMinutes"] = "每 {0} 分钟",
+            ["EveryXHours"] = "每 {0} 小时",
+            ["EveryXHoursOn"] = "每 {0} 小时（{1}）",
+            ["EveryMonthOnDay"] = "每月第 {0} 天",
+            ["OnDayAndWeek"] = "每月第 {0} 天和{1}",
+            ["EveryDayOfWeek"] = "每{0}",
+            ["EveryXMonthsOnDay"] = "每 {0} 个月的第 {1} 天",
+            ["TimeFormat"] = "24"
+        });
+
+    private static string ToHumanReadableJapanese(string cron, CronSettings settings, TimeZoneInfo? timeZone) =>
+        BuildHumanReadable(cron, settings, timeZone, new Dictionary<string, string>
+        {
+            ["EveryDay"] = "毎日",
+            ["AtTime"] = "{0}に",
+            ["EveryXMinutes"] = "{0}分ごと",
+            ["EveryXHours"] = "{0}時間ごと",
+            ["EveryXHoursOn"] = "{1}に{0}時間ごと",
+            ["EveryMonthOnDay"] = "毎月{0}日",
+            ["OnDayAndWeek"] = "毎月{0}日と{1}",
+            ["EveryDayOfWeek"] = "毎週{0}",
+            ["EveryXMonthsOnDay"] = "{0}か月ごとの{1}日",
+            ["TimeFormat"] = "24"
+        });
 
     private static string BuildHumanReadable(
         string cron,
@@ -90,7 +195,7 @@ public static class CronHelper
         string month = parts[3];
         string dayOfWeek = parts[4];
 
-        string time = FormatTime(hour, minute, timeZone);
+        string time = FormatTime(hour, minute, timeZone, phrases);
 
         string Phrase(string key, params object[] args) =>
             phrases.TryGetValue(key, out var value)
@@ -127,19 +232,19 @@ public static class CronHelper
         // day-of-month: 15W → "Nearest weekday to the 15th"
         if (dayOfMonth.EndsWith('W'))
         {
-            var baseDay = Ordinal(dayOfMonth.TrimEnd('W'));
+            var baseDay = Ordinal(dayOfMonth.TrimEnd('W'), settings.Language);
             return $"Nearest weekday to the {baseDay} of the month {Phrase("AtTime", time)}";
         }
 
         // --- Range and list patterns ---
 
-        if (TryDescribeTimePattern(hour, minute, timeZone, out var timePattern))
+        if (TryDescribeTimePattern(hour, minute, timeZone, phrases, out var timePattern))
         {
             if (dayOfWeek != "*" && dayOfWeek != "?")
                 return $"{timePattern} on {JoinDays(dayOfWeek, daysMap)}";
 
             if (dayOfMonth != "*")
-                return $"{timePattern} on the {DescribeOrdinals(dayOfMonth)} of every month";
+                return $"{timePattern} on the {DescribeOrdinals(dayOfMonth, settings.Language)} of every month";
 
             return timePattern.StartsWith("At ", StringComparison.Ordinal)
                 ? $"Every day at {timePattern[3..]}"
@@ -148,7 +253,7 @@ public static class CronHelper
 
         if (dayOfMonth.Contains('-') && (dayOfWeek == "*" || dayOfWeek == "?"))
         {
-            var dayRange = DescribeOrdinals(dayOfMonth);
+            var dayRange = DescribeOrdinals(dayOfMonth, settings.Language);
             return $"Every day from the {dayRange} {Phrase("AtTime", time)}";
         }
 
@@ -167,19 +272,19 @@ public static class CronHelper
             return Phrase("EveryDay") + " " + Phrase("AtTime", time);
 
         if (dayOfWeek != "*" && dayOfMonth == "*")
-            return $"Every {JoinDays(dayOfWeek, daysMap)} {Phrase("AtTime", time)}";
+            return $"{Phrase("EveryDayOfWeek", JoinDays(dayOfWeek, daysMap))} {Phrase("AtTime", time)}";
 
         if (dayOfMonth != "*" && (dayOfWeek == "*" || dayOfWeek == "?"))
         {
-            string monthDesc = month.StartsWith("*/")
-                ? $"Every {month.Replace("*/", "")} months"
-                : "Every month";
+            var ordinal = DescribeOrdinals(dayOfMonth, settings.Language);
 
-            return $"{monthDesc} on the {DescribeOrdinals(dayOfMonth)} {Phrase("AtTime", time)}";
+            return month.StartsWith("*/")
+                ? $"{Phrase("EveryXMonthsOnDay", month.Replace("*/", ""), ordinal)} {Phrase("AtTime", time)}"
+                : $"{Phrase("EveryMonthOnDay", ordinal)} {Phrase("AtTime", time)}";
         }
 
         if (dayOfMonth != "*" && dayOfWeek != "*")
-            return Phrase("OnDayAndWeek", DescribeOrdinals(dayOfMonth), JoinDays(dayOfWeek, daysMap))
+            return Phrase("OnDayAndWeek", DescribeOrdinals(dayOfMonth, settings.Language), JoinDays(dayOfWeek, daysMap))
                    + " " + Phrase("AtTime", time);
 
         return cron;
@@ -224,15 +329,23 @@ public static class CronHelper
         return quartzCron;
     }
 
-    private static string FormatTime(string hour, string minute, TimeZoneInfo? timeZone)
+    private static string FormatTime(
+        string hour,
+        string minute,
+        TimeZoneInfo? timeZone,
+        Dictionary<string, string> phrases)
     {
         int h = int.TryParse(hour.Replace("*/", "0"), out var hParsed) ? hParsed : 0;
         int m = int.TryParse(minute.Replace("*/", "0"), out var mParsed) ? mParsed : 0;
 
-        return FormatTime(h, m, timeZone);
+        return FormatTime(h, m, timeZone, phrases);
     }
 
-    private static string FormatTime(int hour, int minute, TimeZoneInfo? timeZone)
+    private static string FormatTime(
+        int hour,
+        int minute,
+        TimeZoneInfo? timeZone,
+        Dictionary<string, string> phrases)
     {
         DateTime utcTime = new DateTime(2000, 1, 1, hour, minute, 0, DateTimeKind.Utc);
 
@@ -240,10 +353,13 @@ public static class CronHelper
             ? TimeZoneInfo.ConvertTimeFromUtc(utcTime, timeZone)
             : utcTime;
 
-        return localTime.ToString("hh:mm tt", System.Globalization.CultureInfo.InvariantCulture);
+        var format = phrases.TryGetValue("TimeFormat", out var timeFormat) && timeFormat == "24"
+            ? "HH:mm"
+            : "hh:mm tt";
+        return localTime.ToString(format, System.Globalization.CultureInfo.InvariantCulture);
     }
 
-    private static string Ordinal(string number)
+    private static string Ordinal(string number, string language = "en")
     {
         if (number.Contains("/"))
             number = number.Split('/')[0];
@@ -251,6 +367,18 @@ public static class CronHelper
         if (!int.TryParse(number, out int n))
             return number;
 
+        return language.ToLowerInvariant() switch
+        {
+            "de" => $"{n}.",
+            "pt" => $"{n}º",
+            "it" or "zh" or "ja" => n.ToString(),
+            "nl" => $"{n}e",
+            _ => EnglishOrdinal(n)
+        };
+    }
+
+    private static string EnglishOrdinal(int n)
+    {
         return n switch
         {
             int _ when n % 100 is >= 11 and <= 13 => $"{n}th",
@@ -261,7 +389,7 @@ public static class CronHelper
         };
     }
 
-    private static string DescribeOrdinals(string expression)
+    private static string DescribeOrdinals(string expression, string language = "en")
     {
         var descriptions = expression
             .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
@@ -269,8 +397,8 @@ public static class CronHelper
             {
                 var bounds = part.Split('-', StringSplitOptions.TrimEntries);
                 return bounds.Length == 2
-                    ? $"{Ordinal(bounds[0])} through the {Ordinal(bounds[1])}"
-                    : Ordinal(part);
+                    ? $"{Ordinal(bounds[0], language)} through the {Ordinal(bounds[1], language)}"
+                    : Ordinal(part, language);
             })
             .ToList();
 
@@ -281,6 +409,7 @@ public static class CronHelper
         string hour,
         string minute,
         TimeZoneInfo? timeZone,
+        Dictionary<string, string> phrases,
         out string description)
     {
         description = string.Empty;
@@ -293,7 +422,7 @@ public static class CronHelper
                 int.TryParse(bounds[1], out var endHour))
             {
                 description =
-                    $"Every hour from {FormatTime(startHour, fixedMinute, timeZone)} to {FormatTime(endHour, fixedMinute, timeZone)}";
+                    $"Every hour from {FormatTime(startHour, fixedMinute, timeZone, phrases)} to {FormatTime(endHour, fixedMinute, timeZone, phrases)}";
                 return true;
             }
         }
@@ -306,7 +435,7 @@ public static class CronHelper
                 int.TryParse(bounds[1], out var endMinute))
             {
                 description =
-                    $"Every minute from {FormatTime(fixedHour, startMinute, timeZone)} to {FormatTime(fixedHour, endMinute, timeZone)}";
+                    $"Every minute from {FormatTime(fixedHour, startMinute, timeZone, phrases)} to {FormatTime(fixedHour, endMinute, timeZone, phrases)}";
                 return true;
             }
         }
@@ -318,7 +447,7 @@ public static class CronHelper
             var times = (
                 from parsedHour in hours
                 from parsedMinute in minutes
-                select FormatTime(parsedHour, parsedMinute, timeZone))
+                select FormatTime(parsedHour, parsedMinute, timeZone, phrases))
                 .ToList();
 
             description = $"At {JoinDescriptions(times)}";
