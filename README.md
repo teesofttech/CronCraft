@@ -46,7 +46,7 @@ var settings = new CronSettings
 {
     Language = "en",
     DayNameFormat = "short",
-    TimeFormat = "HH:mm" // Optional: use "hh:mm tt" for 12-hour output
+    TimeFormat = "HH:mm" // Optional: 24-hour output (default: "hh:mm tt")
 };
 
 // Without timezone

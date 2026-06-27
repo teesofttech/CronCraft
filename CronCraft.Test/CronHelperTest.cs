@@ -153,6 +153,19 @@ public sealed class CronHelperTest
     }
 
     [DataTestMethod]
+    [DataRow("")]
+    [DataRow("   ")]
+    public void Test_BlankTimeFormat_UsesDefault(string timeFormat)
+    {
+        var settings = new CronSettings { TimeFormat = timeFormat };
+
+        string result = CronHelper.ToHumanReadable("30 14 * * *", settings);
+
+        Assert.AreEqual("hh:mm tt", settings.TimeFormat);
+        Assert.AreEqual("Every day at 02:30 PM", result);
+    }
+
+    [DataTestMethod]
     [DataRow("0 0 * * *", "Every day at 00:00")]
     [DataRow("30 14 * * *", "Every day at 14:30")]
     [DataRow("59 23 * * *", "Every day at 23:59")]

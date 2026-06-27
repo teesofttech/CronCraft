@@ -36,7 +36,7 @@
         public string TimeFormat
         {
             get => _timeFormat ?? "hh:mm tt";
-            set => _timeFormat = value;
+            set => _timeFormat = string.IsNullOrWhiteSpace(value) ? null : value;
         }
 
         internal bool HasTimeFormatOverride => !string.IsNullOrWhiteSpace(_timeFormat);
