@@ -222,6 +222,16 @@ public sealed class CronHelperTest
         Assert.AreEqual("Every 3 months at 09:00 AM", result);
     }
 
+    [TestMethod]
+    public void Test_SpecificMonthWithDayOfWeek()
+    {
+        var settings = new CronSettings { Language = "en", DayNameFormat = "short" };
+
+        string result = CronHelper.ToHumanReadable("0 9 * 6 1", settings);
+
+        Assert.AreEqual("Every Mon in June at 09:00 AM", result);
+    }
+
     [DataTestMethod]
     [DataRow("en", "Every year on March 1st at 09:00 AM")]
     [DataRow("es", "Cada año el día 1st de Marzo a las 09:00 AM")]
@@ -237,6 +247,29 @@ public sealed class CronHelperTest
         var settings = new CronSettings { Language = language };
 
         string result = CronHelper.ToHumanReadable("0 9 1 3 *", settings);
+
+        Assert.AreEqual(expected, result);
+    }
+
+    [DataTestMethod]
+    [DataRow("en", "Every Mon in June at 09:00 AM")]
+    [DataRow("es", "Cada Lun en Junio a las 09:00 AM")]
+    [DataRow("fr", "Chaque Lun en Juin à 09:00 AM")]
+    [DataRow("de", "Jeden Mo im Juni um 09:00 Uhr")]
+    [DataRow("pt", "Em Seg em Junho às 09:00")]
+    [DataRow("it", "Ogni Lun in Giugno alle 09:00")]
+    [DataRow("nl", "Elke Ma in Juni om 09:00")]
+    [DataRow("zh", "六月每周一 09:00")]
+    [DataRow("ja", "6月の毎週月曜 09:00に")]
+    public void Test_SpecificMonthWithDayOfWeek_IsLocalized(string language, string expected)
+    {
+        var settings = new CronSettings
+        {
+            Language = language,
+            DayNameFormat = "short"
+        };
+
+        string result = CronHelper.ToHumanReadable("0 9 * 6 1", settings);
 
         Assert.AreEqual(expected, result);
     }

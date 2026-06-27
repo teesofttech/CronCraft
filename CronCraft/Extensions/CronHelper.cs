@@ -49,6 +49,7 @@ public static class CronHelper
             ["EveryXMonths"] = "Every {0} months",
             ["OnDayAndWeek"] = "On {0} and {1}",
             ["EveryDayOfWeek"] = "Every {0}",
+            ["EveryDayOfWeekInMonth"] = "Every {0} in {1}",
             ["EveryXMonthsOnDay"] = "Every {0} months on the {1}",
             ["TimeFormat"] = "12"
         });
@@ -69,6 +70,7 @@ public static class CronHelper
             ["EveryXMonths"] = "Cada {0} meses",
             ["OnDayAndWeek"] = "El {0} y los {1}",
             ["EveryDayOfWeek"] = "Cada {0}",
+            ["EveryDayOfWeekInMonth"] = "Cada {0} en {1}",
             ["EveryXMonthsOnDay"] = "Cada {0} meses el día {1}",
             ["TimeFormat"] = "12"
         });
@@ -89,6 +91,7 @@ public static class CronHelper
             ["EveryXMonths"] = "Tous les {0} mois",
             ["OnDayAndWeek"] = "Le {0} et le {1}",
             ["EveryDayOfWeek"] = "Chaque {0}",
+            ["EveryDayOfWeekInMonth"] = "Chaque {0} en {1}",
             ["EveryXMonthsOnDay"] = "Tous les {0} mois le {1}",
             ["TimeFormat"] = "12"
         });
@@ -108,6 +111,7 @@ public static class CronHelper
             ["EveryXMonths"] = "Alle {0} Monate",
             ["OnDayAndWeek"] = "Am {0} und am {1}",
             ["EveryDayOfWeek"] = "Jeden {0}",
+            ["EveryDayOfWeekInMonth"] = "Jeden {0} im {1}",
             ["EveryXMonthsOnDay"] = "Alle {0} Monate am {1}",
             ["TimeFormat"] = "24"
         });
@@ -126,6 +130,7 @@ public static class CronHelper
             ["EveryXMonths"] = "A cada {0} meses",
             ["OnDayAndWeek"] = "No dia {0} e em {1}",
             ["EveryDayOfWeek"] = "Em {0}",
+            ["EveryDayOfWeekInMonth"] = "Em {0} em {1}",
             ["EveryXMonthsOnDay"] = "A cada {0} meses no dia {1}",
             ["TimeFormat"] = "24"
         });
@@ -144,6 +149,7 @@ public static class CronHelper
             ["EveryXMonths"] = "Ogni {0} mesi",
             ["OnDayAndWeek"] = "Il giorno {0} e di {1}",
             ["EveryDayOfWeek"] = "Ogni {0}",
+            ["EveryDayOfWeekInMonth"] = "Ogni {0} in {1}",
             ["EveryXMonthsOnDay"] = "Ogni {0} mesi il giorno {1}",
             ["TimeFormat"] = "24"
         });
@@ -162,6 +168,7 @@ public static class CronHelper
             ["EveryXMonths"] = "Elke {0} maanden",
             ["OnDayAndWeek"] = "Op de {0} en op {1}",
             ["EveryDayOfWeek"] = "Elke {0}",
+            ["EveryDayOfWeekInMonth"] = "Elke {0} in {1}",
             ["EveryXMonthsOnDay"] = "Elke {0} maanden op de {1}",
             ["TimeFormat"] = "24"
         });
@@ -180,6 +187,7 @@ public static class CronHelper
             ["EveryXMonths"] = "每 {0} 个月",
             ["OnDayAndWeek"] = "每月第 {0} 天和{1}",
             ["EveryDayOfWeek"] = "每{0}",
+            ["EveryDayOfWeekInMonth"] = "{1}每{0}",
             ["EveryXMonthsOnDay"] = "每 {0} 个月的第 {1} 天",
             ["TimeFormat"] = "24"
         });
@@ -198,6 +206,7 @@ public static class CronHelper
             ["EveryXMonths"] = "{0}か月ごと",
             ["OnDayAndWeek"] = "毎月{0}日と{1}",
             ["EveryDayOfWeek"] = "毎週{0}",
+            ["EveryDayOfWeekInMonth"] = "{1}の毎週{0}",
             ["EveryXMonthsOnDay"] = "{0}か月ごとの{1}日",
             ["TimeFormat"] = "24"
         });
@@ -309,7 +318,7 @@ public static class CronHelper
         if (dayOfWeek != "*" && dayOfMonth == "*")
         {
             if (TryGetMonthName(month, settings.Language, out var monthName))
-                return $"{Phrase("EveryDayOfWeek", JoinDays(dayOfWeek, daysMap))} in {monthName} {Phrase("AtTime", time)}";
+                return $"{Phrase("EveryDayOfWeekInMonth", JoinDays(dayOfWeek, daysMap), monthName)} {Phrase("AtTime", time)}";
 
             return $"{Phrase("EveryDayOfWeek", JoinDays(dayOfWeek, daysMap))} {Phrase("AtTime", time)}";
         }
