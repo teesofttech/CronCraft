@@ -44,6 +44,9 @@ public static class CronHelper
             ["EveryXHours"] = "Every {0} hours",
             ["EveryXHoursOn"] = "Every {0} hours on {1}",
             ["EveryMonthOnDay"] = "Every month on the {0}",
+            ["EveryYearOnMonthDay"] = "Every year on {0} {1}",
+            ["EveryDayInMonth"] = "Every day in {0}",
+            ["EveryXMonths"] = "Every {0} months",
             ["OnDayAndWeek"] = "On {0} and {1}",
             ["EveryDayOfWeek"] = "Every {0}",
             ["EveryXMonthsOnDay"] = "Every {0} months on the {1}",
@@ -61,6 +64,9 @@ public static class CronHelper
             ["EveryXHours"] = "Cada {0} horas",
             ["EveryXHoursOn"] = "Cada {0} horas los {1}",
             ["EveryMonthOnDay"] = "Cada mes el día {0}",
+            ["EveryYearOnMonthDay"] = "Cada año el día {1} de {0}",
+            ["EveryDayInMonth"] = "Cada día en {0}",
+            ["EveryXMonths"] = "Cada {0} meses",
             ["OnDayAndWeek"] = "El {0} y los {1}",
             ["EveryDayOfWeek"] = "Cada {0}",
             ["EveryXMonthsOnDay"] = "Cada {0} meses el día {1}",
@@ -78,6 +84,9 @@ public static class CronHelper
             ["EveryXHours"] = "Toutes les {0} heures",
             ["EveryXHoursOn"] = "Toutes les {0} heures le {1}",
             ["EveryMonthOnDay"] = "Chaque mois le {0}",
+            ["EveryYearOnMonthDay"] = "Chaque année le {1} en {0}",
+            ["EveryDayInMonth"] = "Chaque jour en {0}",
+            ["EveryXMonths"] = "Tous les {0} mois",
             ["OnDayAndWeek"] = "Le {0} et le {1}",
             ["EveryDayOfWeek"] = "Chaque {0}",
             ["EveryXMonthsOnDay"] = "Tous les {0} mois le {1}",
@@ -94,6 +103,9 @@ public static class CronHelper
             ["EveryXHours"] = "Alle {0} Stunden",
             ["EveryXHoursOn"] = "Alle {0} Stunden am {1}",
             ["EveryMonthOnDay"] = "Jeden Monat am {0}",
+            ["EveryYearOnMonthDay"] = "Jedes Jahr am {1} im {0}",
+            ["EveryDayInMonth"] = "Jeden Tag im {0}",
+            ["EveryXMonths"] = "Alle {0} Monate",
             ["OnDayAndWeek"] = "Am {0} und am {1}",
             ["EveryDayOfWeek"] = "Jeden {0}",
             ["EveryXMonthsOnDay"] = "Alle {0} Monate am {1}",
@@ -109,6 +121,9 @@ public static class CronHelper
             ["EveryXHours"] = "A cada {0} horas",
             ["EveryXHoursOn"] = "A cada {0} horas em {1}",
             ["EveryMonthOnDay"] = "Todo mês no dia {0}",
+            ["EveryYearOnMonthDay"] = "Todo ano no dia {1} de {0}",
+            ["EveryDayInMonth"] = "Todos os dias em {0}",
+            ["EveryXMonths"] = "A cada {0} meses",
             ["OnDayAndWeek"] = "No dia {0} e em {1}",
             ["EveryDayOfWeek"] = "Em {0}",
             ["EveryXMonthsOnDay"] = "A cada {0} meses no dia {1}",
@@ -124,6 +139,9 @@ public static class CronHelper
             ["EveryXHours"] = "Ogni {0} ore",
             ["EveryXHoursOn"] = "Ogni {0} ore di {1}",
             ["EveryMonthOnDay"] = "Ogni mese il giorno {0}",
+            ["EveryYearOnMonthDay"] = "Ogni anno il giorno {1} di {0}",
+            ["EveryDayInMonth"] = "Ogni giorno in {0}",
+            ["EveryXMonths"] = "Ogni {0} mesi",
             ["OnDayAndWeek"] = "Il giorno {0} e di {1}",
             ["EveryDayOfWeek"] = "Ogni {0}",
             ["EveryXMonthsOnDay"] = "Ogni {0} mesi il giorno {1}",
@@ -139,6 +157,9 @@ public static class CronHelper
             ["EveryXHours"] = "Elke {0} uur",
             ["EveryXHoursOn"] = "Elke {0} uur op {1}",
             ["EveryMonthOnDay"] = "Elke maand op de {0}",
+            ["EveryYearOnMonthDay"] = "Elk jaar op {1} {0}",
+            ["EveryDayInMonth"] = "Elke dag in {0}",
+            ["EveryXMonths"] = "Elke {0} maanden",
             ["OnDayAndWeek"] = "Op de {0} en op {1}",
             ["EveryDayOfWeek"] = "Elke {0}",
             ["EveryXMonthsOnDay"] = "Elke {0} maanden op de {1}",
@@ -154,6 +175,9 @@ public static class CronHelper
             ["EveryXHours"] = "每 {0} 小时",
             ["EveryXHoursOn"] = "每 {0} 小时（{1}）",
             ["EveryMonthOnDay"] = "每月第 {0} 天",
+            ["EveryYearOnMonthDay"] = "每年{0}第 {1} 天",
+            ["EveryDayInMonth"] = "{0}每天",
+            ["EveryXMonths"] = "每 {0} 个月",
             ["OnDayAndWeek"] = "每月第 {0} 天和{1}",
             ["EveryDayOfWeek"] = "每{0}",
             ["EveryXMonthsOnDay"] = "每 {0} 个月的第 {1} 天",
@@ -169,6 +193,9 @@ public static class CronHelper
             ["EveryXHours"] = "{0}時間ごと",
             ["EveryXHoursOn"] = "{1}に{0}時間ごと",
             ["EveryMonthOnDay"] = "毎月{0}日",
+            ["EveryYearOnMonthDay"] = "毎年{0}{1}日",
+            ["EveryDayInMonth"] = "{0}は毎日",
+            ["EveryXMonths"] = "{0}か月ごと",
             ["OnDayAndWeek"] = "毎月{0}日と{1}",
             ["EveryDayOfWeek"] = "毎週{0}",
             ["EveryXMonthsOnDay"] = "{0}か月ごとの{1}日",
@@ -269,10 +296,23 @@ public static class CronHelper
         }
 
         if ((dayOfWeek == "*" || dayOfWeek == "?") && dayOfMonth == "*")
+        {
+            if (month.StartsWith("*/"))
+                return $"{Phrase("EveryXMonths", month.Replace("*/", ""))} {Phrase("AtTime", time)}";
+
+            if (TryGetMonthName(month, settings.Language, out var monthName))
+                return $"{Phrase("EveryDayInMonth", monthName)} {Phrase("AtTime", time)}";
+
             return Phrase("EveryDay") + " " + Phrase("AtTime", time);
+        }
 
         if (dayOfWeek != "*" && dayOfMonth == "*")
+        {
+            if (TryGetMonthName(month, settings.Language, out var monthName))
+                return $"{Phrase("EveryDayOfWeek", JoinDays(dayOfWeek, daysMap))} in {monthName} {Phrase("AtTime", time)}";
+
             return $"{Phrase("EveryDayOfWeek", JoinDays(dayOfWeek, daysMap))} {Phrase("AtTime", time)}";
+        }
 
         if (dayOfMonth != "*" && (dayOfWeek == "*" || dayOfWeek == "?"))
         {
@@ -280,6 +320,8 @@ public static class CronHelper
 
             return month.StartsWith("*/")
                 ? $"{Phrase("EveryXMonthsOnDay", month.Replace("*/", ""), ordinal)} {Phrase("AtTime", time)}"
+                : TryGetMonthName(month, settings.Language, out var monthName)
+                    ? $"{Phrase("EveryYearOnMonthDay", monthName, ordinal)} {Phrase("AtTime", time)}"
                 : $"{Phrase("EveryMonthOnDay", ordinal)} {Phrase("AtTime", time)}";
         }
 
@@ -403,6 +445,66 @@ public static class CronHelper
             .ToList();
 
         return JoinDescriptions(descriptions);
+    }
+
+    private static bool TryGetMonthName(string month, string language, out string monthName)
+    {
+        monthName = string.Empty;
+
+        if (!int.TryParse(month, out var monthNumber) || monthNumber is < 1 or > 12)
+            return false;
+
+        var names = language.ToLowerInvariant() switch
+        {
+            "es" => new string[]
+            {
+                "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
+                "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"
+            },
+            "fr" => new string[]
+            {
+                "Janvier", "Février", "Mars", "Avril", "Mai", "Juin",
+                "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"
+            },
+            "de" => new string[]
+            {
+                "Januar", "Februar", "März", "April", "Mai", "Juni",
+                "Juli", "August", "September", "Oktober", "November", "Dezember"
+            },
+            "pt" => new string[]
+            {
+                "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
+                "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"
+            },
+            "it" => new string[]
+            {
+                "Gennaio", "Febbraio", "Marzo", "Aprile", "Maggio", "Giugno",
+                "Luglio", "Agosto", "Settembre", "Ottobre", "Novembre", "Dicembre"
+            },
+            "nl" => new string[]
+            {
+                "Januari", "Februari", "Maart", "April", "Mei", "Juni",
+                "Juli", "Augustus", "September", "Oktober", "November", "December"
+            },
+            "zh" => new string[]
+            {
+                "一月", "二月", "三月", "四月", "五月", "六月",
+                "七月", "八月", "九月", "十月", "十一月", "十二月"
+            },
+            "ja" => new string[]
+            {
+                "1月", "2月", "3月", "4月", "5月", "6月",
+                "7月", "8月", "9月", "10月", "11月", "12月"
+            },
+            _ => new string[]
+            {
+                "January", "February", "March", "April", "May", "June",
+                "July", "August", "September", "October", "November", "December"
+            }
+        };
+
+        monthName = names[monthNumber - 1];
+        return true;
     }
 
     private static bool TryDescribeTimePattern(
