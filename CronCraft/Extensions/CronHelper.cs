@@ -231,7 +231,7 @@ public static class CronHelper
         string month = parts[3];
         string dayOfWeek = parts[4];
 
-        string time = FormatTime(hour, minute, timeZone, phrases);
+        string time = FormatTime(hour, minute, timeZone, settings, phrases);
 
         string Phrase(string key, params object[] args) =>
             phrases.TryGetValue(key, out var value)
@@ -274,7 +274,7 @@ public static class CronHelper
 
         // --- Range and list patterns ---
 
-        if (TryDescribeTimePattern(hour, minute, timeZone, phrases, out var timePattern))
+        if (TryDescribeTimePattern(hour, minute, timeZone, settings, phrases, out var timePattern))
         {
             if (dayOfWeek != "*" && dayOfWeek != "?")
                 return $"{timePattern} on {JoinDays(dayOfWeek, daysMap)}";
@@ -384,18 +384,20 @@ public static class CronHelper
         string hour,
         string minute,
         TimeZoneInfo? timeZone,
+        CronSettings settings,
         Dictionary<string, string> phrases)
     {
         int h = int.TryParse(hour.Replace("*/", "0"), out var hParsed) ? hParsed : 0;
         int m = int.TryParse(minute.Replace("*/", "0"), out var mParsed) ? mParsed : 0;
 
-        return FormatTime(h, m, timeZone, phrases);
+        return FormatTime(h, m, timeZone, settings, phrases);
     }
 
     private static string FormatTime(
         int hour,
         int minute,
         TimeZoneInfo? timeZone,
+        CronSettings settings,
         Dictionary<string, string> phrases)
     {
         DateTime utcTime = new DateTime(2000, 1, 1, hour, minute, 0, DateTimeKind.Utc);
@@ -404,9 +406,11 @@ public static class CronHelper
             ? TimeZoneInfo.ConvertTimeFromUtc(utcTime, timeZone)
             : utcTime;
 
-        var format = phrases.TryGetValue("TimeFormat", out var timeFormat) && timeFormat == "24"
-            ? "HH:mm"
-            : "hh:mm tt";
+        var format = settings.HasTimeFormatOverride
+            ? settings.TimeFormat
+            : phrases.TryGetValue("TimeFormat", out var timeFormat) && timeFormat == "24"
+                ? "HH:mm"
+                : "hh:mm tt";
         return localTime.ToString(format, System.Globalization.CultureInfo.InvariantCulture);
     }
 
@@ -520,6 +524,7 @@ public static class CronHelper
         string hour,
         string minute,
         TimeZoneInfo? timeZone,
+        CronSettings settings,
         Dictionary<string, string> phrases,
         out string description)
     {
@@ -533,7 +538,7 @@ public static class CronHelper
                 int.TryParse(bounds[1], out var endHour))
             {
                 description =
-                    $"Every hour from {FormatTime(startHour, fixedMinute, timeZone, phrases)} to {FormatTime(endHour, fixedMinute, timeZone, phrases)}";
+                    $"Every hour from {FormatTime(startHour, fixedMinute, timeZone, settings, phrases)} to {FormatTime(endHour, fixedMinute, timeZone, settings, phrases)}";
                 return true;
             }
         }
@@ -546,7 +551,7 @@ public static class CronHelper
                 int.TryParse(bounds[1], out var endMinute))
             {
                 description =
-                    $"Every minute from {FormatTime(fixedHour, startMinute, timeZone, phrases)} to {FormatTime(fixedHour, endMinute, timeZone, phrases)}";
+                    $"Every minute from {FormatTime(fixedHour, startMinute, timeZone, settings, phrases)} to {FormatTime(fixedHour, endMinute, timeZone, settings, phrases)}";
                 return true;
             }
         }
@@ -558,7 +563,7 @@ public static class CronHelper
             var times = (
                 from parsedHour in hours
                 from parsedMinute in minutes
-                select FormatTime(parsedHour, parsedMinute, timeZone, phrases))
+                select FormatTime(parsedHour, parsedMinute, timeZone, settings, phrases))
                 .ToList();
 
             description = $"At {JoinDescriptions(times)}";

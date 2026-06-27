@@ -145,6 +145,85 @@ public sealed class CronHelperTest
     }
 
     [TestMethod]
+    public void Test_DefaultTimeFormat_Is12Hour()
+    {
+        var settings = new CronSettings();
+
+        Assert.AreEqual("hh:mm tt", settings.TimeFormat);
+    }
+
+    [DataTestMethod]
+    [DataRow("0 0 * * *", "Every day at 00:00")]
+    [DataRow("30 14 * * *", "Every day at 14:30")]
+    [DataRow("59 23 * * *", "Every day at 23:59")]
+    public void Test_CustomTimeFormat_24Hour(string cron, string expected)
+    {
+        var settings = new CronSettings { TimeFormat = "HH:mm" };
+
+        string result = CronHelper.ToHumanReadable(cron, settings);
+
+        Assert.AreEqual(expected, result);
+    }
+
+    [TestMethod]
+    public void Test_CustomTimeFormat_12Hour()
+    {
+        var settings = new CronSettings { TimeFormat = "hh:mm tt" };
+
+        string result = CronHelper.ToHumanReadable("30 14 * * *", settings);
+
+        Assert.AreEqual("Every day at 02:30 PM", result);
+    }
+
+    [TestMethod]
+    public void Test_CustomTimeFormat_OverridesLanguageDefault()
+    {
+        var settings = new CronSettings
+        {
+            Language = "de",
+            TimeFormat = "hh:mm tt"
+        };
+
+        string result = CronHelper.ToHumanReadable("30 14 * * *", settings);
+
+        Assert.AreEqual("Jeden Tag um 02:30 PM Uhr", result);
+    }
+
+    [TestMethod]
+    public void Test_LanguageDefaultTimeFormat_IsPreservedWithoutOverride()
+    {
+        var settings = new CronSettings { Language = "de" };
+
+        string result = CronHelper.ToHumanReadable("30 14 * * *", settings);
+
+        Assert.AreEqual("Jeden Tag um 14:30 Uhr", result);
+    }
+
+    [TestMethod]
+    public void Test_CustomTimeFormat_AppliesToTimeRanges()
+    {
+        var settings = CreateCustomSettings();
+        settings.TimeFormat = "HH:mm";
+
+        string result = CronHelper.ToHumanReadable("0 8-17 * * 1-5", settings);
+
+        Assert.AreEqual(
+            "Every hour from 08:00 to 17:00 on Monday through Friday",
+            result);
+    }
+
+    [TestMethod]
+    public void Test_CustomTimeFormat_AppliesToTimeLists()
+    {
+        var settings = CreateCustomSettings();
+        settings.TimeFormat = "HH:mm";
+
+        string result = CronHelper.ToHumanReadable("0 8,12,17 * * *", settings);
+
+        Assert.AreEqual("Every day at 08:00, 12:00 and 17:00", result);
+    }
+
+    [TestMethod]
     public void Test_EveryMonAtTime()
     {
         var settings = CreateCustomSettings();
