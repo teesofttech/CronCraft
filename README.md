@@ -45,7 +45,8 @@ string cronExpression = "0 0 * * *"; // Every day at midnight
 var settings = new CronSettings
 {
     Language = "en",
-    DayNameFormat = "short"
+    DayNameFormat = "short",
+    TimeFormat = "HH:mm" // Optional: 24-hour output (default: "hh:mm tt")
 };
 
 // Without timezone
