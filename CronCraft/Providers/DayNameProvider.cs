@@ -31,14 +31,14 @@ public static class DayNameProvider
 
     private static readonly Dictionary<string, string> FullFrench = new()
     {
-        { "0", "Dimanche" }, { "1", "Lundi" }, { "2", "Mardi" }, { "3", "Mercredi" },
-        { "4", "Jeudi" }, { "5", "Vendredi" }, { "6", "Samedi" }, { "7", "Dimanche" }
+        { "0", "dimanche" }, { "1", "lundi" }, { "2", "mardi" }, { "3", "mercredi" },
+        { "4", "jeudi" }, { "5", "vendredi" }, { "6", "samedi" }, { "7", "dimanche" }
     };
 
     private static readonly Dictionary<string, string> ShortFrench = new()
     {
-        { "0", "Dim" }, { "1", "Lun" }, { "2", "Mar" }, { "3", "Mer" },
-        { "4", "Jeu" }, { "5", "Ven" }, { "6", "Sam" }, { "7", "Dim" }
+        { "0", "dim" }, { "1", "lun" }, { "2", "mar" }, { "3", "mer" },
+        { "4", "jeu" }, { "5", "ven" }, { "6", "sam" }, { "7", "dim" }
     };
 
     private static readonly Dictionary<string, string> SingleFrench = new()
@@ -50,14 +50,14 @@ public static class DayNameProvider
 
     private static readonly Dictionary<string, string> FullSpanish = new()
     {
-        { "0", "Domingo" }, { "1", "Lunes" }, { "2", "Martes" }, { "3", "Miércoles" },
-        { "4", "Jueves" }, { "5", "Viernes" }, { "6", "Sábado" }, { "7", "Domingo" }
+        { "0", "domingo" }, { "1", "lunes" }, { "2", "martes" }, { "3", "miércoles" },
+        { "4", "jueves" }, { "5", "viernes" }, { "6", "sábado" }, { "7", "domingo" }
     };
 
     private static readonly Dictionary<string, string> ShortSpanish = new()
     {
-        { "0", "Dom" }, { "1", "Lun" }, { "2", "Mar" }, { "3", "Mié" },
-        { "4", "Jue" }, { "5", "Vie" }, { "6", "Sáb" }, { "7", "Dom" }
+        { "0", "dom" }, { "1", "lun" }, { "2", "mar" }, { "3", "mié" },
+        { "4", "jue" }, { "5", "vie" }, { "6", "sáb" }, { "7", "dom" }
     };
 
     private static readonly Dictionary<string, string> SingleSpanish = new()
@@ -74,23 +74,23 @@ public static class DayNameProvider
         CreateDayMap("S", "M", "D", "M", "D", "F", "S");
 
     private static readonly Dictionary<string, string> FullPortuguese =
-        CreateDayMap("Domingo", "Segunda-feira", "Terça-feira", "Quarta-feira", "Quinta-feira", "Sexta-feira", "Sábado");
+        CreateDayMap("domingo", "segunda-feira", "terça-feira", "quarta-feira", "quinta-feira", "sexta-feira", "sábado");
     private static readonly Dictionary<string, string> ShortPortuguese =
-        CreateDayMap("Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb");
+        CreateDayMap("dom", "seg", "ter", "qua", "qui", "sex", "sáb");
     private static readonly Dictionary<string, string> SinglePortuguese =
         CreateDayMap("D", "S", "T", "Q", "Q", "S", "S");
 
     private static readonly Dictionary<string, string> FullItalian =
-        CreateDayMap("Domenica", "Lunedì", "Martedì", "Mercoledì", "Giovedì", "Venerdì", "Sabato");
+        CreateDayMap("domenica", "lunedì", "martedì", "mercoledì", "giovedì", "venerdì", "sabato");
     private static readonly Dictionary<string, string> ShortItalian =
-        CreateDayMap("Dom", "Lun", "Mar", "Mer", "Gio", "Ven", "Sab");
+        CreateDayMap("dom", "lun", "mar", "mer", "gio", "ven", "sab");
     private static readonly Dictionary<string, string> SingleItalian =
         CreateDayMap("D", "L", "M", "M", "G", "V", "S");
 
     private static readonly Dictionary<string, string> FullDutch =
-        CreateDayMap("Zondag", "Maandag", "Dinsdag", "Woensdag", "Donderdag", "Vrijdag", "Zaterdag");
+        CreateDayMap("zondag", "maandag", "dinsdag", "woensdag", "donderdag", "vrijdag", "zaterdag");
     private static readonly Dictionary<string, string> ShortDutch =
-        CreateDayMap("Zo", "Ma", "Di", "Wo", "Do", "Vr", "Za");
+        CreateDayMap("zo", "ma", "di", "wo", "do", "vr", "za");
     private static readonly Dictionary<string, string> SingleDutch =
         CreateDayMap("Z", "M", "D", "W", "D", "V", "Z");
 

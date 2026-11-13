@@ -126,6 +126,16 @@ Press Enter to exit...
 - Japanese (`ja`)
 - Easily extendable via custom mappings
 
+Localized descriptions use language-specific ordinals, conjunctions, ranges,
+and singular forms:
+
+```csharp
+var french = new CronSettings { Language = "fr", DayNameFormat = "short" };
+
+string description = "0 9 * * 1,3,5".ToHumanReadable(french);
+// Chaque lun, mer et ven à 09:00 AM
+```
+
 ---
 
 ## 🧑‍💻 Author

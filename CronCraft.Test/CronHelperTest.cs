@@ -350,12 +350,12 @@ public sealed class CronHelperTest
 
     [DataTestMethod]
     [DataRow("en", "Every year on March 1st at 09:00 AM")]
-    [DataRow("es", "Cada año el día 1st de Marzo a las 09:00 AM")]
-    [DataRow("fr", "Chaque année le 1st en Mars à 09:00 AM")]
+    [DataRow("es", "Cada año el día 1 de marzo a las 09:00 AM")]
+    [DataRow("fr", "Chaque année le 1er mars à 09:00 AM")]
     [DataRow("de", "Jedes Jahr am 1. im März um 09:00 Uhr")]
-    [DataRow("pt", "Todo ano no dia 1º de Março às 09:00")]
-    [DataRow("it", "Ogni anno il giorno 1 di Marzo alle 09:00")]
-    [DataRow("nl", "Elk jaar op 1e Maart om 09:00")]
+    [DataRow("pt", "Todo ano no dia 1º de março às 09:00")]
+    [DataRow("it", "Ogni anno il giorno 1 di marzo alle 09:00")]
+    [DataRow("nl", "Elk jaar op 1e maart om 09:00")]
     [DataRow("zh", "每年三月第 1 天 09:00")]
     [DataRow("ja", "毎年3月1日 09:00に")]
     public void Test_SpecificMonthName_IsLocalized(string language, string expected)
@@ -369,12 +369,12 @@ public sealed class CronHelperTest
 
     [DataTestMethod]
     [DataRow("en", "Every Mon in June at 09:00 AM")]
-    [DataRow("es", "Cada Lun en Junio a las 09:00 AM")]
-    [DataRow("fr", "Chaque Lun en Juin à 09:00 AM")]
+    [DataRow("es", "Cada lun en junio a las 09:00 AM")]
+    [DataRow("fr", "Chaque lun en juin à 09:00 AM")]
     [DataRow("de", "Jeden Mo im Juni um 09:00 Uhr")]
-    [DataRow("pt", "Em Seg em Junho às 09:00")]
-    [DataRow("it", "Ogni Lun in Giugno alle 09:00")]
-    [DataRow("nl", "Elke Ma in Juni om 09:00")]
+    [DataRow("pt", "Em seg em junho às 09:00")]
+    [DataRow("it", "Ogni lun in giugno alle 09:00")]
+    [DataRow("nl", "Elke ma in juni om 09:00")]
     [DataRow("zh", "六月每周一 09:00")]
     [DataRow("ja", "6月の毎週月曜 09:00に")]
     public void Test_SpecificMonthWithDayOfWeek_IsLocalized(string language, string expected)
@@ -623,7 +623,7 @@ public sealed class CronHelperTest
     [DataTestMethod]
     [DataRow("*/5 * * * *", "Cada 5 minutos")]
     [DataRow("0 */2 * * *", "Cada 2 horas")]
-    [DataRow("0 9 * * 1", "Cada Lunes a las 09:00 AM")]
+    [DataRow("0 9 * * 1", "Cada lunes a las 09:00 AM")]
     public void Test_SpanishLocalization(string cron, string expected)
     {
         AssertLocalized("es", cron, "full", expected);
@@ -632,10 +632,116 @@ public sealed class CronHelperTest
     [DataTestMethod]
     [DataRow("*/5 * * * *", "Toutes les 5 minutes")]
     [DataRow("0 */2 * * *", "Toutes les 2 heures")]
-    [DataRow("0 9 * * 1", "Chaque Lundi à 09:00 AM")]
+    [DataRow("0 9 * * 1", "Chaque lundi à 09:00 AM")]
     public void Test_FrenchLocalization(string cron, string expected)
     {
         AssertLocalized("fr", cron, "full", expected);
+    }
+
+    [DataTestMethod]
+    [DataRow("en", "Every Mon, Wed and Fri at 09:00 AM")]
+    [DataRow("es", "Cada lun, mié y vie a las 09:00 AM")]
+    [DataRow("fr", "Chaque lun, mer et ven à 09:00 AM")]
+    [DataRow("de", "Jeden Mo, Mi und Fr um 09:00 Uhr")]
+    [DataRow("pt", "Em seg, qua e sex às 09:00")]
+    [DataRow("it", "Ogni lun, mer e ven alle 09:00")]
+    [DataRow("nl", "Elke ma, wo en vr om 09:00")]
+    [DataRow("zh", "每周一、周三和周五 09:00")]
+    [DataRow("ja", "毎週月曜、水曜と金曜 09:00に")]
+    public void Test_LocalizedDayList_UsesLanguageConjunction(string language, string expected)
+    {
+        AssertLocalized(language, "0 9 * * 1,3,5", "short", expected);
+    }
+
+    [DataTestMethod]
+    [DataRow("en", "Every Mon through Fri at 09:00 AM")]
+    [DataRow("es", "De lun a vie a las 09:00 AM")]
+    [DataRow("fr", "Du lun au ven à 09:00 AM")]
+    [DataRow("de", "Von Mo bis Fr um 09:00 Uhr")]
+    [DataRow("pt", "De seg a sex às 09:00")]
+    [DataRow("it", "Da lun a ven alle 09:00")]
+    [DataRow("nl", "Van ma tot en met vr om 09:00")]
+    [DataRow("zh", "每周一至周五 09:00")]
+    [DataRow("ja", "毎週月曜から金曜まで 09:00に")]
+    public void Test_LocalizedDayRange_UsesLanguageRangeConnector(string language, string expected)
+    {
+        AssertLocalized(language, "0 9 * * 1-5", "short", expected);
+    }
+
+    [DataTestMethod]
+    [DataRow("en", "*/1 * * * *", "Every minute")]
+    [DataRow("es", "*/1 * * * *", "Cada minuto")]
+    [DataRow("fr", "*/1 * * * *", "Chaque minute")]
+    [DataRow("de", "*/1 * * * *", "Jede Minute")]
+    [DataRow("pt", "*/1 * * * *", "A cada minuto")]
+    [DataRow("it", "*/1 * * * *", "Ogni minuto")]
+    [DataRow("nl", "*/1 * * * *", "Elke minuut")]
+    [DataRow("zh", "*/1 * * * *", "每分钟")]
+    [DataRow("ja", "*/1 * * * *", "毎分")]
+    [DataRow("en", "0 */1 * * *", "Every hour")]
+    [DataRow("es", "0 */1 * * *", "Cada hora")]
+    [DataRow("fr", "0 */1 * * *", "Chaque heure")]
+    [DataRow("de", "0 */1 * * *", "Jede Stunde")]
+    [DataRow("pt", "0 */1 * * *", "A cada hora")]
+    [DataRow("it", "0 */1 * * *", "Ogni ora")]
+    [DataRow("nl", "0 */1 * * *", "Elk uur")]
+    [DataRow("zh", "0 */1 * * *", "每小时")]
+    [DataRow("ja", "0 */1 * * *", "毎時")]
+    [DataRow("en", "0 9 1 */1 *", "Every month on the 1st at 09:00 AM")]
+    [DataRow("es", "0 9 1 */1 *", "Cada mes el día 1 a las 09:00 AM")]
+    [DataRow("fr", "0 9 1 */1 *", "Chaque mois le 1er à 09:00 AM")]
+    [DataRow("de", "0 9 1 */1 *", "Jeden Monat am 1. um 09:00 Uhr")]
+    [DataRow("pt", "0 9 1 */1 *", "Todo mês no dia 1º às 09:00")]
+    [DataRow("it", "0 9 1 */1 *", "Ogni mese il giorno 1 alle 09:00")]
+    [DataRow("nl", "0 9 1 */1 *", "Elke maand op de 1e om 09:00")]
+    [DataRow("zh", "0 9 1 */1 *", "每月第 1 天 09:00")]
+    [DataRow("ja", "0 9 1 */1 *", "毎月1日 09:00に")]
+    public void Test_SingularInterval_UsesLanguageSingularPhrase(
+        string language,
+        string cron,
+        string expected)
+    {
+        AssertLocalized(language, cron, "short", expected);
+    }
+
+    [DataTestMethod]
+    [DataRow("es", "Cada día a las 08:00 AM y 12:00 PM")]
+    [DataRow("fr", "Chaque jour à 08:00 AM et 12:00 PM")]
+    public void Test_LocalizedTimeList_UsesLanguageGrammar(string language, string expected)
+    {
+        AssertLocalized(language, "0 8,12 * * *", "short", expected);
+    }
+
+    [DataTestMethod]
+    [DataRow("es", "Cada hora de 08:00 AM a 10:00 AM")]
+    [DataRow("fr", "Chaque heure de 08:00 AM à 10:00 AM")]
+    public void Test_LocalizedTimeRange_UsesLanguageGrammar(string language, string expected)
+    {
+        AssertLocalized(language, "0 8-10 * * *", "short", expected);
+    }
+
+    [DataTestMethod]
+    [DataRow("es", "Cada día del 1 al 3 a las 09:00 AM")]
+    [DataRow("fr", "Chaque jour du 1er au 3 à 09:00 AM")]
+    public void Test_LocalizedDayOfMonthRange_UsesLanguageOrdinals(string language, string expected)
+    {
+        AssertLocalized(language, "0 9 1-3 * *", "short", expected);
+    }
+
+    [DataTestMethod]
+    [DataRow("es", "Cada primer lunes del mes a las 12:00 AM")]
+    [DataRow("fr", "Chaque premier lundi du mois à 12:00 AM")]
+    public void Test_LocalizedNthWeekday_UsesLanguageOrdinalWords(string language, string expected)
+    {
+        AssertLocalized(language, "0 0 ? * 2#1", "full", expected);
+    }
+
+    [DataTestMethod]
+    [DataRow("es", "Último día del mes a las 12:00 AM")]
+    [DataRow("fr", "Dernier jour du mois à 12:00 AM")]
+    public void Test_LocalizedQuartzSpecial_ContainsNoEnglishGrammar(string language, string expected)
+    {
+        AssertLocalized(language, "0 0 L * ?", "full", expected);
     }
 
     [TestMethod]
@@ -667,8 +773,8 @@ public sealed class CronHelperTest
     [DataTestMethod]
     [DataRow("*/5 * * * *", "short", "A cada 5 minutos")]
     [DataRow("0 */2 * * *", "short", "A cada 2 horas")]
-    [DataRow("0 9 * * 1", "full", "Em Segunda-feira às 09:00")]
-    [DataRow("0 9 * * 1", "short", "Em Seg às 09:00")]
+    [DataRow("0 9 * * 1", "full", "Em segunda-feira às 09:00")]
+    [DataRow("0 9 * * 1", "short", "Em seg às 09:00")]
     [DataRow("0 9 * * 1", "single", "Em S às 09:00")]
     [DataRow("0 9 15 * *", "short", "Todo mês no dia 15º às 09:00")]
     public void Test_PortugueseLocalization(string cron, string dayNameFormat, string expected)
@@ -679,8 +785,8 @@ public sealed class CronHelperTest
     [DataTestMethod]
     [DataRow("*/5 * * * *", "short", "Ogni 5 minuti")]
     [DataRow("0 */2 * * *", "short", "Ogni 2 ore")]
-    [DataRow("0 9 * * 1", "full", "Ogni Lunedì alle 09:00")]
-    [DataRow("0 9 * * 1", "short", "Ogni Lun alle 09:00")]
+    [DataRow("0 9 * * 1", "full", "Ogni lunedì alle 09:00")]
+    [DataRow("0 9 * * 1", "short", "Ogni lun alle 09:00")]
     [DataRow("0 9 * * 1", "single", "Ogni L alle 09:00")]
     [DataRow("0 9 15 * *", "short", "Ogni mese il giorno 15 alle 09:00")]
     public void Test_ItalianLocalization(string cron, string dayNameFormat, string expected)
@@ -691,8 +797,8 @@ public sealed class CronHelperTest
     [DataTestMethod]
     [DataRow("*/5 * * * *", "short", "Elke 5 minuten")]
     [DataRow("0 */2 * * *", "short", "Elke 2 uur")]
-    [DataRow("0 9 * * 1", "full", "Elke Maandag om 09:00")]
-    [DataRow("0 9 * * 1", "short", "Elke Ma om 09:00")]
+    [DataRow("0 9 * * 1", "full", "Elke maandag om 09:00")]
+    [DataRow("0 9 * * 1", "short", "Elke ma om 09:00")]
     [DataRow("0 9 * * 1", "single", "Elke M om 09:00")]
     [DataRow("0 9 15 * *", "short", "Elke maand op de 15e om 09:00")]
     public void Test_DutchLocalization(string cron, string dayNameFormat, string expected)
