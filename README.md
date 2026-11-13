@@ -152,6 +152,32 @@ selected `CronSettings.Language`.
 
 ---
 
+## ⏱️ Quartz Seconds and Years
+
+Quartz expressions may contain six fields (including seconds) or seven fields
+(including an optional year):
+
+```csharp
+"*/10 * * * * ?".ToHumanReadable(settings);
+// Every 10 seconds
+
+"30 15 10 * * ?".ToHumanReadable(settings);
+// Every day at 10:15:30 AM
+
+"0 0 12 * * ? 2027-2029".ToHumanReadable(settings);
+// Every day at 12:00 PM in 2027 through 2029
+```
+
+Seconds support fixed values, wildcards, steps, lists, and ranges from `0` to
+`59`. A non-zero fixed second is added to the rendered time even when
+`TimeFormat` omits `ss`; formats that already contain seconds are preserved.
+
+Years support values, steps, lists, and ranges from `1970` to `2099`. A `*`
+year remains unrestricted and is omitted from the description. Five-field Unix
+cron expressions keep their existing behavior.
+
+---
+
 ## 🌐 Languages Supported
 
 - English (`en`)
