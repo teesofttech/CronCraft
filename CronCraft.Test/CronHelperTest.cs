@@ -637,6 +637,158 @@ public sealed class CronHelperTest
     }
 
     [TestMethod]
+    public void Test_QuartzWildcardSeconds_RendersEverySecond()
+    {
+        var settings = new CronSettings();
+
+        string result = CronHelper.ToHumanReadable("* * * * * ?", settings);
+
+        Assert.AreEqual("Every second", result);
+    }
+
+    [DataTestMethod]
+    [DataRow("*/10 * * * * ?")]
+    [DataRow("0/10 * * * * ?")]
+    public void Test_QuartzSecondStep_RendersInterval(string cron)
+    {
+        var settings = new CronSettings();
+
+        string result = CronHelper.ToHumanReadable(cron, settings);
+
+        Assert.AreEqual("Every 10 seconds", result);
+    }
+
+    [TestMethod]
+    public void Test_QuartzSecondStep_WithScheduledMinutePreservesBothConstraints()
+    {
+        var settings = new CronSettings();
+
+        string result = CronHelper.ToHumanReadable("*/10 15 10 * * ?", settings);
+
+        Assert.AreEqual(
+            "Every day at 10:15 AM, every 10 seconds during that scheduled minute",
+            result);
+    }
+
+    [TestMethod]
+    public void Test_QuartzFixedSecond_IsIncludedInTime()
+    {
+        var settings = new CronSettings();
+
+        string result = CronHelper.ToHumanReadable("30 15 10 * * ?", settings);
+
+        Assert.AreEqual("Every day at 10:15:30 AM", result);
+    }
+
+    [DataTestMethod]
+    [DataRow("HH:mm", "Every day at 10:15:30")]
+    [DataRow("HH:mm:ss", "Every day at 10:15:30")]
+    public void Test_QuartzFixedSecond_RespectsCustomTimeFormat(string format, string expected)
+    {
+        var settings = new CronSettings { TimeFormat = format };
+
+        string result = CronHelper.ToHumanReadable("30 15 10 * * ?", settings);
+
+        Assert.AreEqual(expected, result);
+    }
+
+    [TestMethod]
+    public void Test_QuartzFixedSecondWithWildcardTime_DescribesSecondWithinMinute()
+    {
+        var settings = new CronSettings();
+
+        string result = CronHelper.ToHumanReadable("30 * * * * ?", settings);
+
+        Assert.AreEqual("At second 30 of every minute", result);
+    }
+
+    [TestMethod]
+    public void Test_QuartzSecondList_DescribesSecondsWithinMinute()
+    {
+        var settings = new CronSettings();
+
+        string result = CronHelper.ToHumanReadable("10,20 * * * * ?", settings);
+
+        Assert.AreEqual("At seconds 10 and 20 of every minute", result);
+    }
+
+    [TestMethod]
+    public void Test_QuartzSecondList_WithScheduledMinutePreservesBothConstraints()
+    {
+        var settings = new CronSettings();
+
+        string result = CronHelper.ToHumanReadable("10,20 15 10 * * ?", settings);
+
+        Assert.AreEqual("Every day at 10:15 AM at seconds 10 and 20", result);
+    }
+
+    [TestMethod]
+    public void Test_QuartzConcreteYear_IsIncluded()
+    {
+        var settings = new CronSettings();
+
+        string result = CronHelper.ToHumanReadable("0 0 12 * * ? 2027", settings);
+
+        Assert.AreEqual("Every day at 12:00 PM in 2027", result);
+    }
+
+    [TestMethod]
+    public void Test_QuartzYearList_IsIncluded()
+    {
+        var settings = new CronSettings();
+
+        string result = CronHelper.ToHumanReadable("0 0 12 * * ? 2027,2029", settings);
+
+        Assert.AreEqual("Every day at 12:00 PM in 2027 and 2029", result);
+    }
+
+    [TestMethod]
+    public void Test_QuartzYearRange_IsIncluded()
+    {
+        var settings = new CronSettings();
+
+        string result = CronHelper.ToHumanReadable("0 0 12 * * ? 2027-2029", settings);
+
+        Assert.AreEqual("Every day at 12:00 PM in 2027 through 2029", result);
+    }
+
+    [TestMethod]
+    public void Test_QuartzYearStep_IsIncluded()
+    {
+        var settings = new CronSettings();
+
+        string result = CronHelper.ToHumanReadable("0 0 12 * * ? 2024/2", settings);
+
+        Assert.AreEqual("Every day at 12:00 PM every 2 years starting in 2024", result);
+    }
+
+    [TestMethod]
+    public void Test_QuartzWildcardYear_RemainsUnrestricted()
+    {
+        var settings = new CronSettings();
+
+        string result = CronHelper.ToHumanReadable("0 0 12 * * ? *", settings);
+
+        Assert.AreEqual("Every day at 12:00 PM", result);
+    }
+
+    [DataTestMethod]
+    [DataRow("60 0 12 * * ?", "invalid second value '60'")]
+    [DataRow("0 0 12 * * ? 1969", "invalid year value '1969'")]
+    [DataRow("0 0 12 * * ? 2100", "invalid year value '2100'")]
+    public void Test_QuartzInvalidSecondOrYear_Throws(
+        string cron,
+        string expectedMessage)
+    {
+        var settings = new CronSettings();
+
+        var ex = Assert.ThrowsException<InvalidCronExpressionException>(() =>
+            CronHelper.ToHumanReadable(cron, settings));
+
+        StringAssert.Contains(ex.Message, expectedMessage);
+    }
+
+    [TestMethod]
     public void Test_NullExpression_ThrowsArgumentException()
     {
         var settings = CreateCustomSettings();
