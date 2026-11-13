@@ -98,6 +98,140 @@ public static class CronHelper
         };
     }
 
+    /// <summary>
+    /// Attempts to convert a cron expression without throwing for invalid input.
+    /// </summary>
+    /// <param name="cronExpression">The cron expression to convert.</param>
+    /// <param name="settings">The settings controlling localization and formatting.</param>
+    /// <param name="description">The human-readable description when conversion succeeds.</param>
+    /// <param name="error">Structured failure details when conversion fails.</param>
+    /// <param name="timeZone">
+    /// Optional timezone to convert UTC times into. When supplied, this overrides
+    /// <see cref="CronSettings.TimeZone"/>.
+    /// </param>
+    /// <returns><see langword="true"/> when conversion succeeds; otherwise, <see langword="false"/>.</returns>
+    public static bool TryToHumanReadable(
+        this string? cronExpression,
+        CronSettings settings,
+        out string? description,
+        out CronValidationError? error,
+        TimeZoneInfo? timeZone = null)
+    {
+        description = null;
+
+        if (cronExpression is null)
+        {
+            error = new CronValidationError(
+                CronValidationErrorCodes.NullExpression,
+                "Cron expression must not be null.",
+                "expression");
+            return false;
+        }
+
+        if (string.IsNullOrWhiteSpace(cronExpression))
+        {
+            error = new CronValidationError(
+                CronValidationErrorCodes.EmptyExpression,
+                "Cron expression must not be empty or whitespace.",
+                "expression",
+                cronExpression);
+            return false;
+        }
+
+        if (settings is null)
+        {
+            error = new CronValidationError(
+                CronValidationErrorCodes.InvalidSettings,
+                "Cron settings must not be null.",
+                "settings");
+            return false;
+        }
+
+        try
+        {
+            description = cronExpression.ToHumanReadable(settings, timeZone);
+            error = null;
+            return true;
+        }
+        catch (InvalidCronExpressionException ex)
+        {
+            error = ex.ValidationError;
+        }
+        catch (TimeZoneNotFoundException ex)
+        {
+            error = CreateTimeZoneError(settings.TimeZone, ex.Message);
+        }
+        catch (InvalidTimeZoneException ex)
+        {
+            error = CreateTimeZoneError(settings.TimeZone, ex.Message);
+        }
+        catch (FormatException ex)
+        {
+            error = new CronValidationError(
+                CronValidationErrorCodes.InvalidSettings,
+                ex.Message,
+                nameof(CronSettings.TimeFormat),
+                settings.TimeFormat);
+        }
+        catch (ArgumentException ex) when (ex.ParamName == "id")
+        {
+            error = CreateTimeZoneError(settings.TimeZone, ex.Message);
+        }
+        catch (ArgumentException ex)
+        {
+            error = new CronValidationError(
+                CronValidationErrorCodes.InvalidSettings,
+                ex.Message,
+                "settings");
+        }
+
+        return false;
+    }
+
+    /// <summary>
+    /// Attempts to validate a cron expression without creating an exception for invalid input.
+    /// </summary>
+    /// <param name="cronExpression">The cron expression to validate.</param>
+    /// <param name="error">Structured failure details when validation fails.</param>
+    /// <param name="settings">Optional settings used for timezone and custom mapping validation.</param>
+    /// <param name="timeZone">Optional timezone override.</param>
+    /// <returns><see langword="true"/> when the expression and settings are valid.</returns>
+    public static bool TryValidate(
+        this string? cronExpression,
+        out CronValidationError? error,
+        CronSettings? settings = null,
+        TimeZoneInfo? timeZone = null)
+    {
+        return TryToHumanReadable(
+            cronExpression,
+            settings ?? new CronSettings(),
+            out _,
+            out error,
+            timeZone);
+    }
+
+    /// <summary>
+    /// Returns whether a cron expression can be converted with the supplied settings.
+    /// </summary>
+    /// <param name="cronExpression">The cron expression to validate.</param>
+    /// <param name="settings">Optional settings used for timezone and custom mapping validation.</param>
+    /// <param name="timeZone">Optional timezone override.</param>
+    /// <returns><see langword="true"/> when the expression and settings are valid.</returns>
+    public static bool IsValid(
+        this string? cronExpression,
+        CronSettings? settings = null,
+        TimeZoneInfo? timeZone = null)
+    {
+        return TryValidate(cronExpression, out _, settings, timeZone);
+    }
+
+    private static CronValidationError CreateTimeZoneError(string? timeZoneId, string message) =>
+        new(
+            CronValidationErrorCodes.InvalidTimeZone,
+            message,
+            nameof(CronSettings.TimeZone),
+            timeZoneId);
+
     private static string ToHumanReadableEnglish(string cron, CronSettings settings, TimeZoneInfo? timeZone)
     {
         return BuildHumanReadable(cron, settings, timeZone, new Dictionary<string, string>
@@ -574,7 +708,20 @@ public static class CronHelper
             return phrases["AtSystemReboot"];
 
         if (CronAliases.TryGetValue(trimmedCron, out var expandedCron))
+        {
             cron = expandedCron;
+        }
+        else if (trimmedCron.StartsWith('@'))
+        {
+            throw new InvalidCronExpressionException(
+                cron,
+                "expected 5 parts but got 1",
+                new CronValidationError(
+                    CronValidationErrorCodes.UnsupportedSyntax,
+                    $"unsupported syntax '{trimmedCron}'",
+                    "expression",
+                    trimmedCron));
+        }
 
         var daysMap = DayNameProvider.GetDayMap(settings);
         var grammar = LocalizationGrammar.ForLanguage(settings.Language);
@@ -833,7 +980,13 @@ public static class CronHelper
                 parts.Length == 7 ? parts[6] : null);
         }
 
-        throw new InvalidCronExpressionException(cron, $"expected 5 parts but got {parts.Length}");
+        throw new InvalidCronExpressionException(
+            cron,
+            new CronValidationError(
+                CronValidationErrorCodes.InvalidPartCount,
+                $"expected 5 parts but got {parts.Length}",
+                "expression",
+                cron));
     }
 
     private static string ApplySecondConstraint(
@@ -1032,12 +1185,16 @@ public static class CronHelper
             if (rangeParts.Length == 1 && IsInRange(rangeParts[0], minimum, maximum))
                 continue;
 
-            if (rangeParts.Length == 2 &&
-                IsInRange(rangeParts[0], minimum, maximum, out var start) &&
-                IsInRange(rangeParts[1], minimum, maximum, out var end) &&
-                start <= end)
+            if (rangeParts.Length == 2)
             {
-                continue;
+                if (IsInRange(rangeParts[0], minimum, maximum, out var start) &&
+                    IsInRange(rangeParts[1], minimum, maximum, out var end) &&
+                    start <= end)
+                {
+                    continue;
+                }
+
+                ThrowInvalidRange(cron, fieldName, expression);
             }
 
             ThrowInvalidField(cron, fieldName, expression);
@@ -1054,7 +1211,23 @@ public static class CronHelper
         int.TryParse(value, out parsed) && parsed >= minimum && parsed <= maximum;
 
     private static void ThrowInvalidField(string cron, string fieldName, string value) =>
-        throw new InvalidCronExpressionException(cron, $"invalid {fieldName} value '{value}'");
+        throw new InvalidCronExpressionException(
+            cron,
+            new CronValidationError(
+                CronValidationErrorCodes.InvalidFieldValue,
+                $"invalid {fieldName} value '{value}'",
+                fieldName,
+                value));
+
+    private static void ThrowInvalidRange(string cron, string fieldName, string value) =>
+        throw new InvalidCronExpressionException(
+            cron,
+            $"invalid {fieldName} value '{value}'",
+            new CronValidationError(
+                CronValidationErrorCodes.InvalidRange,
+                $"invalid {fieldName} range '{value}'",
+                fieldName,
+                value));
 
     private static string FormatTime(
         string hour,

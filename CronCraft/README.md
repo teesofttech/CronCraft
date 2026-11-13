@@ -104,6 +104,60 @@ Press Enter to exit...
 
 ---
 
+## ✅ Validation and Non-Throwing Conversion
+
+`ToHumanReadable` continues to throw `ArgumentException`,
+`InvalidCronExpressionException`, or timezone exceptions when invalid input is
+exceptional:
+
+```csharp
+try
+{
+    string description = cronExpression.ToHumanReadable(settings);
+}
+catch (InvalidCronExpressionException ex)
+{
+    Console.WriteLine(ex.ValidationError.Code);
+}
+```
+
+Interactive applications can use the non-throwing API instead:
+
+```csharp
+if (cronExpression.TryToHumanReadable(
+        settings,
+        out var description,
+        out var error))
+{
+    Console.WriteLine(description);
+}
+else
+{
+    Console.WriteLine($"{error!.Code}: {error.Message}");
+}
+
+bool valid = cronExpression.IsValid(settings);
+bool detailed = cronExpression.TryValidate(out var validationError, settings);
+```
+
+Dependency-injection users can call `TryConvert`, `TryValidate`, and `IsValid`
+on `CronCraftService`.
+
+Stable error codes are available through `CronValidationErrorCodes`:
+
+| Code | Meaning |
+|------|---------|
+| `null_expression` | The expression reference is null |
+| `empty_expression` | The expression is empty or whitespace |
+| `invalid_part_count` | The expression has an unsupported field count |
+| `invalid_field_value` | A cron field contains an invalid value |
+| `invalid_range` | A range is malformed, out of bounds, or reversed |
+| `unsupported_syntax` | CronCraft does not support the supplied syntax |
+| `invalid_time_zone` | The configured timezone is unavailable |
+| `invalid_settings` | Another formatting or mapping setting is invalid |
+
+---
+
 ## 🔧 Supported Day Name Formats
 
 - `full`: e.g. "Sunday"
