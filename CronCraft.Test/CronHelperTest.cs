@@ -349,6 +349,119 @@ public sealed class CronHelperTest
     }
 
     [DataTestMethod]
+    [DataRow("SUN", "Sunday")]
+    [DataRow("MON", "Monday")]
+    [DataRow("TUE", "Tuesday")]
+    [DataRow("WED", "Wednesday")]
+    [DataRow("THU", "Thursday")]
+    [DataRow("FRI", "Friday")]
+    [DataRow("SAT", "Saturday")]
+    public void Test_NamedWeekday_NormalizesEveryAbbreviation(string weekday, string expectedDay)
+    {
+        var settings = new CronSettings { DayNameFormat = "full" };
+
+        string result = CronHelper.ToHumanReadable($"0 9 * * {weekday}", settings);
+
+        Assert.AreEqual($"Every {expectedDay} at 09:00 AM", result);
+    }
+
+    [DataTestMethod]
+    [DataRow("JAN", "January")]
+    [DataRow("FEB", "February")]
+    [DataRow("MAR", "March")]
+    [DataRow("APR", "April")]
+    [DataRow("MAY", "May")]
+    [DataRow("JUN", "June")]
+    [DataRow("JUL", "July")]
+    [DataRow("AUG", "August")]
+    [DataRow("SEP", "September")]
+    [DataRow("OCT", "October")]
+    [DataRow("NOV", "November")]
+    [DataRow("DEC", "December")]
+    public void Test_NamedMonth_NormalizesEveryAbbreviation(string month, string expectedMonth)
+    {
+        var settings = new CronSettings();
+
+        string result = CronHelper.ToHumanReadable($"0 9 1 {month} *", settings);
+
+        Assert.AreEqual($"Every year on {expectedMonth} 1st at 09:00 AM", result);
+    }
+
+    [DataTestMethod]
+    [DataRow("mon", "jan")]
+    [DataRow("Mon", "Jan")]
+    [DataRow("MON", "JAN")]
+    public void Test_NamedValues_AreCaseInsensitive(string weekday, string month)
+    {
+        var settings = new CronSettings { DayNameFormat = "full" };
+
+        string result = CronHelper.ToHumanReadable($"0 9 * {month} {weekday}", settings);
+
+        Assert.AreEqual("Every Monday in January at 09:00 AM", result);
+    }
+
+    [TestMethod]
+    public void Test_NamedWeekdayRange_NormalizesBeforeRendering()
+    {
+        var settings = new CronSettings { DayNameFormat = "full" };
+
+        string result = CronHelper.ToHumanReadable("0 9 * * MON-FRI", settings);
+
+        Assert.AreEqual("Every Monday through Friday at 09:00 AM", result);
+    }
+
+    [TestMethod]
+    public void Test_NamedWeekdayList_NormalizesBeforeRendering()
+    {
+        var settings = new CronSettings { DayNameFormat = "full" };
+
+        string result = CronHelper.ToHumanReadable("0 9 * * MON,WED,FRI", settings);
+
+        Assert.AreEqual("Every Monday, Wednesday and Friday at 09:00 AM", result);
+    }
+
+    [TestMethod]
+    public void Test_NamedMonthList_RendersEveryDate()
+    {
+        var settings = new CronSettings();
+
+        string result = CronHelper.ToHumanReadable("0 0 1 JAN,JUL *", settings);
+
+        Assert.AreEqual("Every year on January 1st and July 1st at 12:00 AM", result);
+    }
+
+    [TestMethod]
+    public void Test_NamedMonthRange_RendersLocalizedRange()
+    {
+        var settings = new CronSettings();
+
+        string result = CronHelper.ToHumanReadable("0 9 * JAN-MAR *", settings);
+
+        Assert.AreEqual("Every day in January through March at 09:00 AM", result);
+    }
+
+    [TestMethod]
+    public void Test_QuartzExpression_NormalizesNamedMonthAndWeekday()
+    {
+        var settings = new CronSettings { DayNameFormat = "full" };
+
+        string result = CronHelper.ToHumanReadable("0 0 9 ? JAN MON", settings);
+
+        Assert.AreEqual("Every Monday in January at 09:00 AM", result);
+    }
+
+    [TestMethod]
+    public void Test_UnknownNamedWeekday_ThrowsInvalidCronExpressionException()
+    {
+        var settings = new CronSettings();
+
+        var ex = Assert.ThrowsException<InvalidCronExpressionException>(() =>
+            CronHelper.ToHumanReadable("0 9 * * FUNDAY", settings));
+
+        StringAssert.Contains(ex.Message, "invalid day-of-week value 'FUNDAY'");
+    }
+
+    [DataTestMethod]
     [DataRow("en", "Every year on March 1st at 09:00 AM")]
     [DataRow("es", "Cada año el día 1 de marzo a las 09:00 AM")]
     [DataRow("fr", "Chaque année le 1er mars à 09:00 AM")]
