@@ -113,6 +113,27 @@ Press Enter to exit...
 
 ---
 
+## 📅 Named Weekdays and Months
+
+Weekday and month abbreviations are case-insensitive and work in individual,
+list, and range expressions:
+
+```csharp
+"0 9 * JAN MON".ToHumanReadable(settings);
+// Every Mon in January at 09:00 AM
+
+"0 9 * * MON-FRI".ToHumanReadable(settings);
+// Every Mon through Fri at 09:00 AM
+
+"0 0 1 JAN,JUL *".ToHumanReadable(settings);
+// Every year on January 1st and July 1st at 12:00 AM
+```
+
+Supported weekday names are `SUN` through `SAT`; supported month names are
+`JAN` through `DEC`.
+
+---
+
 ## 🌐 Languages Supported
 
 - English (`en`)

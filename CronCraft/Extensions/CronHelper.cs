@@ -1,11 +1,45 @@
 using CronCraft.Exceptions;
 using CronCraft.Models;
 using CronCraft.Providers;
+using System.Text.RegularExpressions;
 
 namespace CronCraft.Extensions;
 
 public static class CronHelper
 {
+    private static readonly Regex NamedValuePattern = new(
+        "[A-Za-z]+",
+        RegexOptions.Compiled | RegexOptions.CultureInvariant);
+
+    private static readonly IReadOnlyDictionary<string, string> NamedWeekdays =
+        new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["SUN"] = "0",
+            ["MON"] = "1",
+            ["TUE"] = "2",
+            ["WED"] = "3",
+            ["THU"] = "4",
+            ["FRI"] = "5",
+            ["SAT"] = "6"
+        };
+
+    private static readonly IReadOnlyDictionary<string, string> NamedMonths =
+        new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["JAN"] = "1",
+            ["FEB"] = "2",
+            ["MAR"] = "3",
+            ["APR"] = "4",
+            ["MAY"] = "5",
+            ["JUN"] = "6",
+            ["JUL"] = "7",
+            ["AUG"] = "8",
+            ["SEP"] = "9",
+            ["OCT"] = "10",
+            ["NOV"] = "11",
+            ["DEC"] = "12"
+        };
+
     /// <summary>
     /// Converts a cron expression to a human-readable format based on language and settings.
     /// </summary>
@@ -57,6 +91,8 @@ public static class CronHelper
             ["EveryXHoursOn"] = "Every {0} hours on {1}",
             ["EveryMonthOnDay"] = "Every month on the {0}",
             ["EveryYearOnMonthDay"] = "Every year on {0} {1}",
+            ["EveryYearOnDates"] = "Every year on {0}",
+            ["MonthAndDay"] = "{0} {1}",
             ["EveryDayInMonth"] = "Every day in {0}",
             ["EveryXMonths"] = "Every {0} months",
             ["OnDayAndWeek"] = "On {0} and {1}",
@@ -96,6 +132,8 @@ public static class CronHelper
             ["EveryXHoursOn"] = "Cada {0} horas los {1}",
             ["EveryMonthOnDay"] = "Cada mes el día {0}",
             ["EveryYearOnMonthDay"] = "Cada año el día {1} de {0}",
+            ["EveryYearOnDates"] = "Cada año {0}",
+            ["MonthAndDay"] = "el día {1} de {0}",
             ["EveryDayInMonth"] = "Cada día en {0}",
             ["EveryXMonths"] = "Cada {0} meses",
             ["OnDayAndWeek"] = "El {0} y los {1}",
@@ -135,6 +173,8 @@ public static class CronHelper
             ["EveryXHoursOn"] = "Toutes les {0} heures le {1}",
             ["EveryMonthOnDay"] = "Chaque mois le {0}",
             ["EveryYearOnMonthDay"] = "Chaque année le {1} {0}",
+            ["EveryYearOnDates"] = "Chaque année {0}",
+            ["MonthAndDay"] = "le {1} {0}",
             ["EveryDayInMonth"] = "Chaque jour en {0}",
             ["EveryXMonths"] = "Tous les {0} mois",
             ["OnDayAndWeek"] = "Le {0} et le {1}",
@@ -173,6 +213,8 @@ public static class CronHelper
             ["EveryXHoursOn"] = "Alle {0} Stunden am {1}",
             ["EveryMonthOnDay"] = "Jeden Monat am {0}",
             ["EveryYearOnMonthDay"] = "Jedes Jahr am {1} im {0}",
+            ["EveryYearOnDates"] = "Jedes Jahr {0}",
+            ["MonthAndDay"] = "am {1} im {0}",
             ["EveryDayInMonth"] = "Jeden Tag im {0}",
             ["EveryXMonths"] = "Alle {0} Monate",
             ["OnDayAndWeek"] = "Am {0} und am {1}",
@@ -210,6 +252,8 @@ public static class CronHelper
             ["EveryXHoursOn"] = "A cada {0} horas em {1}",
             ["EveryMonthOnDay"] = "Todo mês no dia {0}",
             ["EveryYearOnMonthDay"] = "Todo ano no dia {1} de {0}",
+            ["EveryYearOnDates"] = "Todo ano {0}",
+            ["MonthAndDay"] = "no dia {1} de {0}",
             ["EveryDayInMonth"] = "Todos os dias em {0}",
             ["EveryXMonths"] = "A cada {0} meses",
             ["OnDayAndWeek"] = "No dia {0} e em {1}",
@@ -247,6 +291,8 @@ public static class CronHelper
             ["EveryXHoursOn"] = "Ogni {0} ore di {1}",
             ["EveryMonthOnDay"] = "Ogni mese il giorno {0}",
             ["EveryYearOnMonthDay"] = "Ogni anno il giorno {1} di {0}",
+            ["EveryYearOnDates"] = "Ogni anno {0}",
+            ["MonthAndDay"] = "il giorno {1} di {0}",
             ["EveryDayInMonth"] = "Ogni giorno in {0}",
             ["EveryXMonths"] = "Ogni {0} mesi",
             ["OnDayAndWeek"] = "Il giorno {0} e di {1}",
@@ -284,6 +330,8 @@ public static class CronHelper
             ["EveryXHoursOn"] = "Elke {0} uur op {1}",
             ["EveryMonthOnDay"] = "Elke maand op de {0}",
             ["EveryYearOnMonthDay"] = "Elk jaar op {1} {0}",
+            ["EveryYearOnDates"] = "Elk jaar {0}",
+            ["MonthAndDay"] = "op {1} {0}",
             ["EveryDayInMonth"] = "Elke dag in {0}",
             ["EveryXMonths"] = "Elke {0} maanden",
             ["OnDayAndWeek"] = "Op de {0} en op {1}",
@@ -321,6 +369,8 @@ public static class CronHelper
             ["EveryXHoursOn"] = "每 {0} 小时（{1}）",
             ["EveryMonthOnDay"] = "每月第 {0} 天",
             ["EveryYearOnMonthDay"] = "每年{0}第 {1} 天",
+            ["EveryYearOnDates"] = "每年{0}",
+            ["MonthAndDay"] = "{0}第 {1} 天",
             ["EveryDayInMonth"] = "{0}每天",
             ["EveryXMonths"] = "每 {0} 个月",
             ["OnDayAndWeek"] = "每月第 {0} 天和{1}",
@@ -358,6 +408,8 @@ public static class CronHelper
             ["EveryXHoursOn"] = "{1}に{0}時間ごと",
             ["EveryMonthOnDay"] = "毎月{0}日",
             ["EveryYearOnMonthDay"] = "毎年{0}{1}日",
+            ["EveryYearOnDates"] = "毎年{0}",
+            ["MonthAndDay"] = "{0}{1}日",
             ["EveryDayInMonth"] = "{0}は毎日",
             ["EveryXMonths"] = "{0}か月ごと",
             ["OnDayAndWeek"] = "毎月{0}日と{1}",
@@ -399,8 +451,8 @@ public static class CronHelper
         string minute = parts[0];
         string hour = parts[1];
         string dayOfMonth = parts[2];
-        string month = parts[3];
-        string dayOfWeek = parts[4];
+        string month = NormalizeNamedValues(parts[3], NamedMonths);
+        string dayOfWeek = NormalizeNamedValues(parts[4], NamedWeekdays);
 
         ValidateFields(cron, minute, hour, dayOfMonth, month, dayOfWeek);
 
@@ -521,6 +573,9 @@ public static class CronHelper
             if (TryGetMonthName(month, settings.Language, out var monthName))
                 return $"{Phrase("EveryDayInMonth", monthName)} {Phrase("AtTime", time)}";
 
+            if (TryDescribeMonths(month, settings.Language, grammar, out var months))
+                return $"{Phrase("EveryDayInMonth", months)} {Phrase("AtTime", time)}";
+
             return Phrase("EveryDay") + " " + Phrase("AtTime", time);
         }
 
@@ -528,6 +583,9 @@ public static class CronHelper
         {
             if (TryGetMonthName(month, settings.Language, out var monthName))
                 return $"{Phrase("EveryDayOfWeekInMonth", JoinDays(dayOfWeek, daysMap, grammar), monthName)} {Phrase("AtTime", time)}";
+
+            if (TryDescribeMonths(month, settings.Language, grammar, out var months))
+                return $"{Phrase("EveryDayOfWeekInMonth", JoinDays(dayOfWeek, daysMap, grammar), months)} {Phrase("AtTime", time)}";
 
             var dayPhrase = Phrase(
                 dayOfWeek.Contains('-') && !dayOfWeek.Contains(',')
@@ -541,13 +599,27 @@ public static class CronHelper
         {
             var ordinal = DescribeOrdinals(dayOfMonth, grammar);
 
-            return month.StartsWith("*/")
-                ? $"{(month.Replace("*/", "") == "1"
+            if (month.StartsWith("*/"))
+            {
+                var interval = month.Replace("*/", "");
+                var monthPhrase = interval == "1"
                     ? Phrase("EveryMonthOnDay", ordinal)
-                    : Phrase("EveryXMonthsOnDay", month.Replace("*/", ""), ordinal))} {Phrase("AtTime", time)}"
-                : TryGetMonthName(month, settings.Language, out var monthName)
-                    ? $"{Phrase("EveryYearOnMonthDay", monthName, ordinal)} {Phrase("AtTime", time)}"
-                : $"{Phrase("EveryMonthOnDay", ordinal)} {Phrase("AtTime", time)}";
+                    : Phrase("EveryXMonthsOnDay", interval, ordinal);
+                return $"{monthPhrase} {Phrase("AtTime", time)}";
+            }
+
+            if (TryGetMonthName(month, settings.Language, out var monthName))
+                return $"{Phrase("EveryYearOnMonthDay", monthName, ordinal)} {Phrase("AtTime", time)}";
+
+            if (TryDescribeMonthParts(month, settings.Language, grammar, out var monthParts))
+            {
+                var dates = monthParts
+                    .Select(value => Phrase("MonthAndDay", value, ordinal))
+                    .ToList();
+                return $"{Phrase("EveryYearOnDates", grammar.Join(dates))} {Phrase("AtTime", time)}";
+            }
+
+            return $"{Phrase("EveryMonthOnDay", ordinal)} {Phrase("AtTime", time)}";
         }
 
         if (dayOfMonth != "*" && dayOfWeek != "*")
@@ -579,7 +651,7 @@ public static class CronHelper
         {
             string minute = parts[1];
             string hour = parts[2];
-            string day = parts[3];
+            string day = parts[3] == "?" ? "*" : parts[3];
             string month = parts[4];
             // Preserve L/#-suffixed values; only replace a bare "?" with "*"
             string dayOfWeek = parts[5] == "?" ? "*" : parts[5];
@@ -756,6 +828,61 @@ public static class CronHelper
             .ToList();
 
         return grammar.Join(descriptions);
+    }
+
+    private static string NormalizeNamedValues(
+        string expression,
+        IReadOnlyDictionary<string, string> names)
+    {
+        return NamedValuePattern.Replace(
+            expression,
+            match => names.TryGetValue(match.Value, out var value) ? value : match.Value);
+    }
+
+    private static bool TryDescribeMonths(
+        string expression,
+        string language,
+        LocalizationGrammar grammar,
+        out string description)
+    {
+        description = string.Empty;
+        if (!TryDescribeMonthParts(expression, language, grammar, out var parts))
+            return false;
+
+        description = grammar.Join(parts);
+        return true;
+    }
+
+    private static bool TryDescribeMonthParts(
+        string expression,
+        string language,
+        LocalizationGrammar grammar,
+        out List<string> descriptions)
+    {
+        descriptions = [];
+
+        foreach (var part in expression.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+        {
+            var range = part.Split('-', StringSplitOptions.TrimEntries);
+            if (range.Length == 1 && TryGetMonthName(range[0], language, out var monthName))
+            {
+                descriptions.Add(monthName);
+                continue;
+            }
+
+            if (range.Length == 2 &&
+                TryGetMonthName(range[0], language, out var startMonth) &&
+                TryGetMonthName(range[1], language, out var endMonth))
+            {
+                descriptions.Add(grammar.FormatRange(startMonth, endMonth));
+                continue;
+            }
+
+            descriptions = [];
+            return false;
+        }
+
+        return descriptions.Count > 0;
     }
 
     private static bool TryGetMonthName(string month, string language, out string monthName)
