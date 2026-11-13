@@ -256,6 +256,30 @@ public sealed class CronHelperTest
         Assert.AreEqual("Every Monday at 10:15 AM", result);
     }
 
+    [DataTestMethod]
+    [DataRow("full", "Every Monday at 09:00 AM")]
+    [DataRow("short", "Every Mon at 09:00 AM")]
+    [DataRow("single", "Every M at 09:00 AM")]
+    public void Test_DayNameFormat_UsesRequestedBuiltInFormat(string format, string expected)
+    {
+        var settings = new CronSettings { DayNameFormat = format };
+
+        string result = CronHelper.ToHumanReadable("0 9 * * 1", settings);
+
+        Assert.AreEqual(expected, result);
+    }
+
+    [TestMethod]
+    public void Test_DayNameFormat_Custom_UsesCustomDayMapping()
+    {
+        var settings = CreateCustomSettings();
+        settings.CustomDayMappings!["1"] = "Moonday";
+
+        string result = CronHelper.ToHumanReadable("0 9 * * 1", settings);
+
+        Assert.AreEqual("Every Moonday at 09:00 AM", result);
+    }
+
     [TestMethod]
     public void Test_Every27thAtTime()
     {
@@ -389,6 +413,27 @@ public sealed class CronHelperTest
     }
 
     [TestMethod]
+    public void Test_TimeZoneSetting_ConvertsFromUtc()
+    {
+        var settings = CreateCustomSettings();
+        settings.TimeZone = "W. Central Africa Standard Time";
+
+        string result = CronHelper.ToHumanReadable("0 4 * * *", settings);
+
+        Assert.AreEqual("Every day at 05:00 AM", result);
+    }
+
+    [TestMethod]
+    public void Test_InvalidTimeZoneSetting_ThrowsTimeZoneNotFoundException()
+    {
+        var settings = CreateCustomSettings();
+        settings.TimeZone = "Not/A-Real-Time-Zone";
+
+        Assert.ThrowsException<TimeZoneNotFoundException>(() =>
+            CronHelper.ToHumanReadable("0 4 * * *", settings));
+    }
+
+    [TestMethod]
     public void Test_Quartz6PartExpression()
     {
         var settings = CreateCustomSettings();
@@ -448,6 +493,38 @@ public sealed class CronHelperTest
             CronHelper.ToHumanReadable("* * * * * * * *", settings));
 
         StringAssert.Contains(ex.Message, "expected 5 parts but got 8");
+    }
+
+    [TestMethod]
+    public void Test_WildcardOnlyExpression_DescribesEveryMinuteSchedule()
+    {
+        var settings = CreateCustomSettings();
+
+        string result = CronHelper.ToHumanReadable("* * * * *", settings);
+
+        Assert.AreEqual("Every minute", result);
+    }
+
+    [TestMethod]
+    public void Test_MinuteStepAboveMaximum_ThrowsInvalidCronExpressionException()
+    {
+        var settings = CreateCustomSettings();
+
+        var ex = Assert.ThrowsException<InvalidCronExpressionException>(() =>
+            CronHelper.ToHumanReadable("*/61 * * * *", settings));
+
+        StringAssert.Contains(ex.Message, "invalid minute value '*/61'");
+    }
+
+    [TestMethod]
+    public void Test_DayOfWeekAboveMaximum_ThrowsInvalidCronExpressionException()
+    {
+        var settings = CreateCustomSettings();
+
+        var ex = Assert.ThrowsException<InvalidCronExpressionException>(() =>
+            CronHelper.ToHumanReadable("0 0 * * 8", settings));
+
+        StringAssert.Contains(ex.Message, "invalid day-of-week value '8'");
     }
 
     [TestMethod]
@@ -541,6 +618,38 @@ public sealed class CronHelperTest
         var settings = new CronSettings { Language = "en", DayNameFormat = "full" };
         string result = CronHelper.ToHumanReadable("0 0 9 ? * 3#1", settings);
         Assert.AreEqual("Every first Tuesday of the month at 09:00 AM", result);
+    }
+
+    [DataTestMethod]
+    [DataRow("*/5 * * * *", "Cada 5 minutos")]
+    [DataRow("0 */2 * * *", "Cada 2 horas")]
+    [DataRow("0 9 * * 1", "Cada Lunes a las 09:00 AM")]
+    public void Test_SpanishLocalization(string cron, string expected)
+    {
+        AssertLocalized("es", cron, "full", expected);
+    }
+
+    [DataTestMethod]
+    [DataRow("*/5 * * * *", "Toutes les 5 minutes")]
+    [DataRow("0 */2 * * *", "Toutes les 2 heures")]
+    [DataRow("0 9 * * 1", "Chaque Lundi à 09:00 AM")]
+    public void Test_FrenchLocalization(string cron, string expected)
+    {
+        AssertLocalized("fr", cron, "full", expected);
+    }
+
+    [TestMethod]
+    public void Test_UnsupportedLanguage_FallsBackToEnglish()
+    {
+        var settings = new CronSettings
+        {
+            Language = "unsupported",
+            DayNameFormat = "full"
+        };
+
+        string result = CronHelper.ToHumanReadable("0 9 * * 1", settings);
+
+        Assert.AreEqual("Every Monday at 09:00 AM", result);
     }
 
     [DataTestMethod]
