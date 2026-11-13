@@ -462,6 +462,78 @@ public sealed class CronHelperTest
     }
 
     [DataTestMethod]
+    [DataRow("@hourly", "Every hour")]
+    [DataRow("@daily", "Every day at 12:00 AM")]
+    [DataRow("@weekly", "Every Sun at 12:00 AM")]
+    [DataRow("@monthly", "Every month on the 1st at 12:00 AM")]
+    [DataRow("@yearly", "Every year on January 1st at 12:00 AM")]
+    [DataRow("@reboot", "At system reboot")]
+    public void Test_CronAlias_RendersEnglishDescription(string alias, string expected)
+    {
+        var settings = new CronSettings();
+
+        string result = CronHelper.ToHumanReadable(alias, settings);
+
+        Assert.AreEqual(expected, result);
+    }
+
+    [DataTestMethod]
+    [DataRow("es", "@hourly", "Cada hora")]
+    [DataRow("es", "@daily", "Cada día a las 12:00 AM")]
+    [DataRow("es", "@weekly", "Cada dom a las 12:00 AM")]
+    [DataRow("es", "@monthly", "Cada mes el día 1 a las 12:00 AM")]
+    [DataRow("es", "@yearly", "Cada año el día 1 de enero a las 12:00 AM")]
+    [DataRow("es", "@reboot", "Al reiniciar el sistema")]
+    [DataRow("fr", "@hourly", "Chaque heure")]
+    [DataRow("fr", "@daily", "Chaque jour à 12:00 AM")]
+    [DataRow("fr", "@weekly", "Chaque dim à 12:00 AM")]
+    [DataRow("fr", "@monthly", "Chaque mois le 1er à 12:00 AM")]
+    [DataRow("fr", "@yearly", "Chaque année le 1er janvier à 12:00 AM")]
+    [DataRow("fr", "@reboot", "Au redémarrage du système")]
+    public void Test_CronAlias_RendersLocalizedDescription(
+        string language,
+        string alias,
+        string expected)
+    {
+        var settings = new CronSettings { Language = language };
+
+        string result = CronHelper.ToHumanReadable(alias, settings);
+
+        Assert.AreEqual(expected, result);
+    }
+
+    [TestMethod]
+    public void Test_CronAlias_IsCaseInsensitiveAndTrimsWhitespace()
+    {
+        var settings = new CronSettings();
+
+        string result = CronHelper.ToHumanReadable("  @DaIlY  ", settings);
+
+        Assert.AreEqual("Every day at 12:00 AM", result);
+    }
+
+    [TestMethod]
+    public void Test_StandardHourlyExpression_RendersEveryHour()
+    {
+        var settings = new CronSettings();
+
+        string result = CronHelper.ToHumanReadable("0 * * * *", settings);
+
+        Assert.AreEqual("Every hour", result);
+    }
+
+    [TestMethod]
+    public void Test_UnknownCronAlias_ThrowsInvalidCronExpressionException()
+    {
+        var settings = new CronSettings();
+
+        var ex = Assert.ThrowsException<InvalidCronExpressionException>(() =>
+            CronHelper.ToHumanReadable("@sometimes", settings));
+
+        StringAssert.Contains(ex.Message, "expected 5 parts but got 1");
+    }
+
+    [DataTestMethod]
     [DataRow("en", "Every year on March 1st at 09:00 AM")]
     [DataRow("es", "Cada año el día 1 de marzo a las 09:00 AM")]
     [DataRow("fr", "Chaque année le 1er mars à 09:00 AM")]
