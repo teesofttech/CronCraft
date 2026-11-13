@@ -134,6 +134,24 @@ Supported weekday names are `SUN` through `SAT`; supported month names are
 
 ---
 
+## ⚡ Cron Aliases
+
+Common Unix cron aliases can be used instead of five-part expressions:
+
+```csharp
+"@hourly".ToHumanReadable(settings);  // Every hour
+"@daily".ToHumanReadable(settings);   // Every day at 12:00 AM
+"@weekly".ToHumanReadable(settings);  // Every Sun at 12:00 AM
+"@monthly".ToHumanReadable(settings); // Every month on the 1st at 12:00 AM
+"@yearly".ToHumanReadable(settings);  // Every year on January 1st at 12:00 AM
+"@reboot".ToHumanReadable(settings);  // At system reboot
+```
+
+Aliases are case-insensitive and produce localized descriptions using the
+selected `CronSettings.Language`.
+
+---
+
 ## 🌐 Languages Supported
 
 - English (`en`)

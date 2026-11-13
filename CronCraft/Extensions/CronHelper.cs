@@ -40,6 +40,16 @@ public static class CronHelper
             ["DEC"] = "12"
         };
 
+    private static readonly IReadOnlyDictionary<string, string> CronAliases =
+        new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["@hourly"] = "0 * * * *",
+            ["@daily"] = "0 0 * * *",
+            ["@weekly"] = "0 0 * * 0",
+            ["@monthly"] = "0 0 1 * *",
+            ["@yearly"] = "0 0 1 1 *"
+        };
+
     /// <summary>
     /// Converts a cron expression to a human-readable format based on language and settings.
     /// </summary>
@@ -85,6 +95,7 @@ public static class CronHelper
             ["EveryHour"] = "Every hour",
             ["EveryHourOn"] = "Every hour on {0}",
             ["EveryMonth"] = "Every month",
+            ["AtSystemReboot"] = "At system reboot",
             ["AtTime"] = "at {0}",
             ["EveryXMinutes"] = "Every {0} minutes",
             ["EveryXHours"] = "Every {0} hours",
@@ -126,6 +137,7 @@ public static class CronHelper
             ["EveryHour"] = "Cada hora",
             ["EveryHourOn"] = "Cada hora los {0}",
             ["EveryMonth"] = "Cada mes",
+            ["AtSystemReboot"] = "Al reiniciar el sistema",
             ["AtTime"] = "a las {0}",
             ["EveryXMinutes"] = "Cada {0} minutos",
             ["EveryXHours"] = "Cada {0} horas",
@@ -167,6 +179,7 @@ public static class CronHelper
             ["EveryHour"] = "Chaque heure",
             ["EveryHourOn"] = "Chaque heure le {0}",
             ["EveryMonth"] = "Chaque mois",
+            ["AtSystemReboot"] = "Au redémarrage du système",
             ["AtTime"] = "à {0}",
             ["EveryXMinutes"] = "Toutes les {0} minutes",
             ["EveryXHours"] = "Toutes les {0} heures",
@@ -207,6 +220,7 @@ public static class CronHelper
             ["EveryHour"] = "Jede Stunde",
             ["EveryHourOn"] = "Jede Stunde am {0}",
             ["EveryMonth"] = "Jeden Monat",
+            ["AtSystemReboot"] = "Beim Systemneustart",
             ["AtTime"] = "um {0} Uhr",
             ["EveryXMinutes"] = "Alle {0} Minuten",
             ["EveryXHours"] = "Alle {0} Stunden",
@@ -246,6 +260,7 @@ public static class CronHelper
             ["EveryHour"] = "A cada hora",
             ["EveryHourOn"] = "A cada hora em {0}",
             ["EveryMonth"] = "Todo mês",
+            ["AtSystemReboot"] = "Na reinicialização do sistema",
             ["AtTime"] = "às {0}",
             ["EveryXMinutes"] = "A cada {0} minutos",
             ["EveryXHours"] = "A cada {0} horas",
@@ -285,6 +300,7 @@ public static class CronHelper
             ["EveryHour"] = "Ogni ora",
             ["EveryHourOn"] = "Ogni ora di {0}",
             ["EveryMonth"] = "Ogni mese",
+            ["AtSystemReboot"] = "Al riavvio del sistema",
             ["AtTime"] = "alle {0}",
             ["EveryXMinutes"] = "Ogni {0} minuti",
             ["EveryXHours"] = "Ogni {0} ore",
@@ -324,6 +340,7 @@ public static class CronHelper
             ["EveryHour"] = "Elk uur",
             ["EveryHourOn"] = "Elk uur op {0}",
             ["EveryMonth"] = "Elke maand",
+            ["AtSystemReboot"] = "Bij het opnieuw opstarten van het systeem",
             ["AtTime"] = "om {0}",
             ["EveryXMinutes"] = "Elke {0} minuten",
             ["EveryXHours"] = "Elke {0} uur",
@@ -363,6 +380,7 @@ public static class CronHelper
             ["EveryHour"] = "每小时",
             ["EveryHourOn"] = "{0}每小时",
             ["EveryMonth"] = "每月",
+            ["AtSystemReboot"] = "系统重启时",
             ["AtTime"] = "{0}",
             ["EveryXMinutes"] = "每 {0} 分钟",
             ["EveryXHours"] = "每 {0} 小时",
@@ -402,6 +420,7 @@ public static class CronHelper
             ["EveryHour"] = "毎時",
             ["EveryHourOn"] = "{0}に毎時",
             ["EveryMonth"] = "毎月",
+            ["AtSystemReboot"] = "システム再起動時",
             ["AtTime"] = "{0}に",
             ["EveryXMinutes"] = "{0}分ごと",
             ["EveryXHours"] = "{0}時間ごと",
@@ -439,6 +458,13 @@ public static class CronHelper
         TimeZoneInfo? timeZone,
         Dictionary<string, string> phrases)
     {
+        var trimmedCron = cron.Trim();
+        if (trimmedCron.Equals("@reboot", StringComparison.OrdinalIgnoreCase))
+            return phrases["AtSystemReboot"];
+
+        if (CronAliases.TryGetValue(trimmedCron, out var expandedCron))
+            cron = expandedCron;
+
         var daysMap = DayNameProvider.GetDayMap(settings);
         var grammar = LocalizationGrammar.ForLanguage(settings.Language);
 
@@ -543,9 +569,9 @@ public static class CronHelper
             return interval == "1" ? Phrase("EveryMinute") : Phrase("EveryXMinutes", interval);
         }
 
-        if (hour.StartsWith("*/") && minute == "0")
+        if ((hour == "*" || hour.StartsWith("*/")) && minute == "0")
         {
-            var interval = hour.Replace("*/", "");
+            var interval = hour == "*" ? "1" : hour.Replace("*/", "");
             var hasDayConstraint = dayOfWeek != "*" && !IsAllDays(dayOfWeek);
             if (interval == "1")
             {
