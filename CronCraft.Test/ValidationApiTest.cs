@@ -130,6 +130,26 @@ public sealed class ValidationApiTest
     }
 
     [TestMethod]
+    public void TryToHumanReadable_NullLanguage_ReturnsInvalidSettings()
+    {
+        var settings = new CronSettings { Language = null! };
+
+        bool success = "0 9 * * *".TryToHumanReadable(
+            settings,
+            out var description,
+            out var error);
+
+        Assert.IsFalse(success);
+        Assert.IsNull(description);
+        Assert.IsNotNull(error);
+        Assert.AreEqual(CronValidationErrorCodes.InvalidSettings, error.Code);
+        Assert.AreEqual(nameof(CronSettings.Language), error.Field);
+        Assert.IsNull(error.Value);
+        Assert.IsFalse("0 9 * * *".TryValidate(out _, settings));
+        Assert.IsFalse("0 9 * * *".IsValid(settings));
+    }
+
+    [TestMethod]
     public void TryToHumanReadable_UnsupportedSyntax_IsDistinguishable()
     {
         const string cron = "@sometimes";
@@ -144,6 +164,18 @@ public sealed class ValidationApiTest
         Assert.AreEqual(CronValidationErrorCodes.UnsupportedSyntax, error.Code);
         Assert.AreEqual("expression", error.Field);
         Assert.AreEqual(cron, error.Value);
+    }
+
+    [TestMethod]
+    public void ThrowingApi_UnsupportedSyntax_PreservesActualPartCount()
+    {
+        const string cron = "@sometimes x";
+
+        var ex = Assert.ThrowsException<InvalidCronExpressionException>(() =>
+            cron.ToHumanReadable(new CronSettings()));
+
+        StringAssert.Contains(ex.Message, "expected 5 parts but got 2");
+        Assert.AreEqual(CronValidationErrorCodes.UnsupportedSyntax, ex.ValidationError.Code);
     }
 
     [TestMethod]

@@ -82,6 +82,9 @@ public static class CronHelper
         if (string.IsNullOrWhiteSpace(cronExpression))
             throw new ArgumentException("Cron expression must not be null or empty.", nameof(cronExpression));
 
+        if (settings.Language is null)
+            throw new ArgumentException("Language must not be null.", nameof(CronSettings.Language));
+
         timeZone ??= ResolveTimeZone(settings.TimeZone);
 
         return settings.Language.ToLower() switch
@@ -176,6 +179,14 @@ public static class CronHelper
         catch (ArgumentException ex) when (ex.ParamName == "id")
         {
             error = CreateTimeZoneError(settings.TimeZone, ex.Message);
+        }
+        catch (ArgumentException ex) when (ex.ParamName == nameof(CronSettings.Language))
+        {
+            error = new CronValidationError(
+                CronValidationErrorCodes.InvalidSettings,
+                ex.Message,
+                nameof(CronSettings.Language),
+                settings.Language);
         }
         catch (ArgumentException ex)
         {
@@ -713,9 +724,11 @@ public static class CronHelper
         }
         else if (trimmedCron.StartsWith('@'))
         {
+            int partCount = trimmedCron.Split(' ', StringSplitOptions.RemoveEmptyEntries).Length;
+
             throw new InvalidCronExpressionException(
                 cron,
-                "expected 5 parts but got 1",
+                $"expected 5 parts but got {partCount}",
                 new CronValidationError(
                     CronValidationErrorCodes.UnsupportedSyntax,
                     $"unsupported syntax '{trimmedCron}'",
