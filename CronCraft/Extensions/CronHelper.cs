@@ -11,14 +11,22 @@ public static class CronHelper
     /// </summary>
     /// <param name="cronExpression">The cron expression to convert.</param>
     /// <param name="settings">The settings controlling language, day-name format, and timezone.</param>
-    /// <param name="timeZone">Optional timezone to convert UTC times into.</param>
+    /// <param name="timeZone">
+    /// Optional timezone to convert UTC times into. When supplied, this overrides
+    /// <see cref="CronSettings.TimeZone"/>.
+    /// </param>
     /// <returns>A human-readable description of the cron schedule.</returns>
     /// <exception cref="ArgumentException">Thrown when <paramref name="cronExpression"/> is null or empty.</exception>
     /// <exception cref="InvalidCronExpressionException">Thrown when <paramref name="cronExpression"/> is malformed.</exception>
+    /// <exception cref="TimeZoneNotFoundException">
+    /// Thrown when <see cref="CronSettings.TimeZone"/> does not identify a system timezone.
+    /// </exception>
     public static string ToHumanReadable(this string cronExpression, CronSettings settings, TimeZoneInfo? timeZone = null)
     {
         if (string.IsNullOrWhiteSpace(cronExpression))
             throw new ArgumentException("Cron expression must not be null or empty.", nameof(cronExpression));
+
+        timeZone ??= ResolveTimeZone(settings.TimeZone);
 
         return settings.Language.ToLower() switch
         {
@@ -39,6 +47,7 @@ public static class CronHelper
         return BuildHumanReadable(cron, settings, timeZone, new Dictionary<string, string>
         {
             ["EveryDay"] = "Every day",
+            ["EveryMinute"] = "Every minute",
             ["AtTime"] = "at {0}",
             ["EveryXMinutes"] = "Every {0} minutes",
             ["EveryXHours"] = "Every {0} hours",
@@ -60,6 +69,7 @@ public static class CronHelper
         return BuildHumanReadable(cron, settings, timeZone, new Dictionary<string, string>
         {
             ["EveryDay"] = "Cada día",
+            ["EveryMinute"] = "Cada minuto",
             ["AtTime"] = "a las {0}",
             ["EveryXMinutes"] = "Cada {0} minutos",
             ["EveryXHours"] = "Cada {0} horas",
@@ -81,6 +91,7 @@ public static class CronHelper
         return BuildHumanReadable(cron, settings, timeZone, new Dictionary<string, string>
         {
             ["EveryDay"] = "Chaque jour",
+            ["EveryMinute"] = "Chaque minute",
             ["AtTime"] = "à {0}",
             ["EveryXMinutes"] = "Toutes les {0} minutes",
             ["EveryXHours"] = "Toutes les {0} heures",
@@ -101,6 +112,7 @@ public static class CronHelper
         BuildHumanReadable(cron, settings, timeZone, new Dictionary<string, string>
         {
             ["EveryDay"] = "Jeden Tag",
+            ["EveryMinute"] = "Jede Minute",
             ["AtTime"] = "um {0} Uhr",
             ["EveryXMinutes"] = "Alle {0} Minuten",
             ["EveryXHours"] = "Alle {0} Stunden",
@@ -120,6 +132,7 @@ public static class CronHelper
         BuildHumanReadable(cron, settings, timeZone, new Dictionary<string, string>
         {
             ["EveryDay"] = "Todos os dias",
+            ["EveryMinute"] = "A cada minuto",
             ["AtTime"] = "às {0}",
             ["EveryXMinutes"] = "A cada {0} minutos",
             ["EveryXHours"] = "A cada {0} horas",
@@ -139,6 +152,7 @@ public static class CronHelper
         BuildHumanReadable(cron, settings, timeZone, new Dictionary<string, string>
         {
             ["EveryDay"] = "Ogni giorno",
+            ["EveryMinute"] = "Ogni minuto",
             ["AtTime"] = "alle {0}",
             ["EveryXMinutes"] = "Ogni {0} minuti",
             ["EveryXHours"] = "Ogni {0} ore",
@@ -158,6 +172,7 @@ public static class CronHelper
         BuildHumanReadable(cron, settings, timeZone, new Dictionary<string, string>
         {
             ["EveryDay"] = "Elke dag",
+            ["EveryMinute"] = "Elke minuut",
             ["AtTime"] = "om {0}",
             ["EveryXMinutes"] = "Elke {0} minuten",
             ["EveryXHours"] = "Elke {0} uur",
@@ -177,6 +192,7 @@ public static class CronHelper
         BuildHumanReadable(cron, settings, timeZone, new Dictionary<string, string>
         {
             ["EveryDay"] = "每天",
+            ["EveryMinute"] = "每分钟",
             ["AtTime"] = "{0}",
             ["EveryXMinutes"] = "每 {0} 分钟",
             ["EveryXHours"] = "每 {0} 小时",
@@ -196,6 +212,7 @@ public static class CronHelper
         BuildHumanReadable(cron, settings, timeZone, new Dictionary<string, string>
         {
             ["EveryDay"] = "毎日",
+            ["EveryMinute"] = "毎分",
             ["AtTime"] = "{0}に",
             ["EveryXMinutes"] = "{0}分ごと",
             ["EveryXHours"] = "{0}時間ごと",
@@ -231,12 +248,17 @@ public static class CronHelper
         string month = parts[3];
         string dayOfWeek = parts[4];
 
+        ValidateFields(cron, minute, hour, dayOfMonth, month, dayOfWeek);
+
         string time = FormatTime(hour, minute, timeZone, settings, phrases);
 
         string Phrase(string key, params object[] args) =>
             phrases.TryGetValue(key, out var value)
                 ? string.Format(value, args)
                 : string.Format(key, args);
+
+        if (minute == "*" && hour == "*" && dayOfMonth == "*" && month == "*" && dayOfWeek == "*")
+            return Phrase("EveryMinute");
 
         // --- Quartz special characters: L, W, # ---
 
@@ -379,6 +401,124 @@ public static class CronHelper
 
         return quartzCron;
     }
+
+    private static TimeZoneInfo? ResolveTimeZone(string? timeZoneId)
+    {
+        return string.IsNullOrWhiteSpace(timeZoneId)
+            ? null
+            : TimeZoneInfo.FindSystemTimeZoneById(timeZoneId);
+    }
+
+    private static void ValidateFields(
+        string cron,
+        string minute,
+        string hour,
+        string dayOfMonth,
+        string month,
+        string dayOfWeek)
+    {
+        ValidateField(cron, minute, "minute", 0, 59);
+        ValidateField(cron, hour, "hour", 0, 23);
+        ValidateDayOfMonth(cron, dayOfMonth);
+        ValidateField(cron, month, "month", 1, 12);
+        ValidateDayOfWeek(cron, dayOfWeek);
+    }
+
+    private static void ValidateDayOfMonth(string cron, string expression)
+    {
+        if (expression is "L" or "LW" or "?")
+            return;
+
+        if (expression.EndsWith('W') &&
+            int.TryParse(expression[..^1], out var nearestWeekday) &&
+            nearestWeekday is >= 1 and <= 31)
+        {
+            return;
+        }
+
+        ValidateField(cron, expression, "day-of-month", 1, 31, allowQuestionMark: true);
+    }
+
+    private static void ValidateDayOfWeek(string cron, string expression)
+    {
+        if (expression == "?")
+            return;
+
+        if (expression.Contains('#'))
+        {
+            var parts = expression.Split('#');
+            if (parts.Length == 2 &&
+                int.TryParse(parts[0], out var day) && day is >= 1 and <= 7 &&
+                int.TryParse(parts[1], out var occurrence) && occurrence is >= 1 and <= 5)
+            {
+                return;
+            }
+
+            ThrowInvalidField(cron, "day-of-week", expression);
+        }
+
+        if (expression.EndsWith('L') &&
+            int.TryParse(expression[..^1], out var lastDay) &&
+            lastDay is >= 1 and <= 7)
+        {
+            return;
+        }
+
+        ValidateField(cron, expression, "day-of-week", 0, 7, allowQuestionMark: true);
+    }
+
+    private static void ValidateField(
+        string cron,
+        string expression,
+        string fieldName,
+        int minimum,
+        int maximum,
+        bool allowQuestionMark = false)
+    {
+        foreach (var item in expression.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+        {
+            if (item == "*" || allowQuestionMark && item == "?")
+                continue;
+
+            var stepParts = item.Split('/');
+            if (stepParts.Length > 2 ||
+                stepParts.Length == 2 &&
+                (!int.TryParse(stepParts[1], out var step) || step < 1 || step > maximum - minimum + 1))
+            {
+                ThrowInvalidField(cron, fieldName, expression);
+            }
+
+            var valueExpression = stepParts[0];
+            if (valueExpression == "*")
+                continue;
+
+            var rangeParts = valueExpression.Split('-');
+            if (rangeParts.Length == 1 && IsInRange(rangeParts[0], minimum, maximum))
+                continue;
+
+            if (rangeParts.Length == 2 &&
+                IsInRange(rangeParts[0], minimum, maximum, out var start) &&
+                IsInRange(rangeParts[1], minimum, maximum, out var end) &&
+                start <= end)
+            {
+                continue;
+            }
+
+            ThrowInvalidField(cron, fieldName, expression);
+        }
+
+        if (string.IsNullOrWhiteSpace(expression))
+            ThrowInvalidField(cron, fieldName, expression);
+    }
+
+    private static bool IsInRange(string value, int minimum, int maximum) =>
+        IsInRange(value, minimum, maximum, out _);
+
+    private static bool IsInRange(string value, int minimum, int maximum, out int parsed) =>
+        int.TryParse(value, out parsed) && parsed >= minimum && parsed <= maximum;
+
+    private static void ThrowInvalidField(string cron, string fieldName, string value) =>
+        throw new InvalidCronExpressionException(cron, $"invalid {fieldName} value '{value}'");
 
     private static string FormatTime(
         string hour,
